@@ -101,7 +101,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       <div
-        className={`sm:hidden fixed inset-0 ${menuOpen ? 'w-full' : 'w-0'} overflow-hidden bg-white backdrop-blur shadow-xl rounded-lg z-[200] text-sm transition-all`}>
+        className={`sm:hidden fixed inset-0 ${menuOpen ? 'w-full' : 'w-0'} overflow-hidden bg-white backdrop-blur shadow-xl rounded-lg z-200 text-sm transition-all`}>
         <div className='flex flex-col items-center justify-center h-full text-xl font-semibold gap-6 p-4'>
           {/* <Link to='/' onClick={() => scrollTo(0, 0)}>
             {' '}
