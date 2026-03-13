@@ -10,7 +10,7 @@ import {
 } from '@pages';
 import React from 'react';
 import { Route, Routes,useLocation } from 'react-router-dom';
-import {Navbar} from '@components';
+import {ChatBox, Navbar} from '@components';
 
 const App = () => {
 
@@ -31,6 +31,8 @@ const App = () => {
         <Route path='/my-orders' element={<MyOrders />} />
         <Route path='/loading' element={<Loading />} />
       </Routes>
+
+      <ChatBox/>
     </div>
   );
 };

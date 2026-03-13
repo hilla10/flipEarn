@@ -293,14 +293,14 @@ const ListingDetails = () => {
             Chat
           </button>
 
-          {
+          {listing.isCredentialChanged && (
             <button
               onClick={purchaseAccount}
               className='w-full mt-2 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition text-sm font-medium flex items-center justify-center gap-2'>
               <ShoppingBagIcon className='size-4' />
               Purchase
             </button>
-          }
+          )}
         </div>
       </div>
 

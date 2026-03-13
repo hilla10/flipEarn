@@ -7,6 +7,7 @@ import Plans from './Plans';
 import CTA from './CTA';
 import Footer from './Footer';
 import FilterSidebar from './FilterSidebar';
+import ChatBox from './ChatBox';
 
 export {
   Hero,
@@ -18,4 +19,5 @@ export {
   CTA,
   FilterSidebar,
   Footer,
+  ChatBox,
 };
