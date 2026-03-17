@@ -70,8 +70,8 @@ const ChatBox = () => {
         {/* Header */}
         <div className='bg-gradient-to-r from-indigo-600 to-indigo-400 text-white p-4 sm:rounded-t-lg flex items-center justify-between'>
           <div className='flex-1 min-w-0'>
-            <h3 class='font-semibold text-lg truncate'>{listing?.title}</h3>
-            <p class='text-sm text-indigo-100 truncate'>
+            <h3 className='font-semibold text-lg truncate'>{listing?.title}</h3>
+            <p className='text-sm text-indigo-100 truncate'>
               {user.id === listing?.ownerId
                 ? `Chatting with buyer (${chat?.chatUser?.name || 'Loading...'})`
                 : `Chatting with seller (${chat?.ownerUser?.name || 'Loading...'})`}
@@ -79,7 +79,7 @@ const ChatBox = () => {
           </div>
           <button
             onClick={() => dispatch(clearChat())}
-            class='ml-4 p-1 hover:bg-white/20 hover:bg-opacity-20 rounded-lg transition-colors'>
+            className='ml-4 p-1 hover:bg-white/20 hover:bg-opacity-20 rounded-lg transition-colors'>
             <X className='size-5' />
           </button>
         </div>
@@ -92,9 +92,9 @@ const ChatBox = () => {
             </div>
           ) : messages.length === 0 ? (
             <div className='flex items-center justify-center h-full'>
-              <div class='text-center'>
-                <p class='text-gray-500 mb-2'>No messages yet</p>
-                <p class='text-sm text-gray-400'>Start the conversation!</p>
+              <div className='text-center'>
+                <p className='text-gray-500 mb-2'>No messages yet</p>
+                <p className='text-sm text-gray-400'>Start the conversation!</p>
               </div>
             </div>
           ) : (
@@ -103,12 +103,12 @@ const ChatBox = () => {
                 className={`flex ${message.sender_id === user.id ? 'justify-end' : 'justify-start'}`}
                 key={message.id}>
                 <div
-                  class={`max-w-[70%] rounded-lg p-3 pb-1 ${message.sender_id === user.id ? 'bg-indigo-600 text-white' : 'bg-white border border-gray-200 text-gray-800'}`}>
-                  <p class='text-sm break-words whitespace-pre-wrap'>
+                  className={`max-w-[70%] rounded-lg p-3 pb-1 ${message.sender_id === user.id ? 'bg-indigo-600 text-white' : 'bg-white border border-gray-200 text-gray-800'}`}>
+                  <p className='text-sm break-words whitespace-pre-wrap'>
                     {message.message}
                   </p>
                   <p
-                    class={`text-[10px] mt-1  ${message.sender_id === user.id ? 'text-indigo-200' : 'text-gray-400'}`}>
+                    className={`text-[10px] mt-1  ${message.sender_id === user.id ? 'text-indigo-200' : 'text-gray-400'}`}>
                     {format(new Date(message.createdAt), 'MMM dd "at" h:mm a')}
                   </p>
                 </div>
@@ -123,7 +123,7 @@ const ChatBox = () => {
           <form
             onSubmit={handleSendMessage}
             className='p-4 bg-white border-t border-gray-200 rounded-b-lg'>
-            <div class='flex items-end space-x-2'>
+            <div className='flex items-end space-x-2'>
               <textarea
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
@@ -134,12 +134,12 @@ const ChatBox = () => {
                   }
                 }}
                 placeholder='Type your message...'
-                class='flex-1 resize-none border border-gray-300 rounded-lg px-4 py-2 focus:outline-indigo-500 max-h-32'
+                className='flex-1 resize-none border border-gray-300 rounded-lg px-4 py-2 focus:outline-indigo-500 max-h-32'
                 rows={1}
               />
               <button
                 type='submit'
-                class='bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-lg disabled:opacity-50 transition-colors'
+                className='bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-lg disabled:opacity-50 transition-colors'
                 disabled={!newMessage.trim() || isSending}>
                 {isSending ? (
                   <Loader2Icon className='size-5 animate-spine' />

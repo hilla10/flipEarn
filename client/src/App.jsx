@@ -9,17 +9,17 @@ import {
   MyOrders,
 } from '@pages';
 import React from 'react';
-import { Route, Routes,useLocation } from 'react-router-dom';
-import {ChatBox, Navbar} from '@components';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import { ChatBox, Navbar } from '@components';
+import { Toaster } from 'react-hot-toast';
 
 const App = () => {
-
-  const {pathname} = useLocation();
-
+  const { pathname } = useLocation();
 
   return (
     <div>
-      {!pathname.includes('/admin') && <Navbar/>}
+      <Toaster />
+      {!pathname.includes('/admin') && <Navbar />}
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/marketplace' element={<Marketplace />} />
@@ -32,7 +32,7 @@ const App = () => {
         <Route path='/loading' element={<Loading />} />
       </Routes>
 
-      <ChatBox/>
+      <ChatBox />
     </div>
   );
 };

@@ -8,6 +8,9 @@ import CTA from './CTA';
 import Footer from './Footer';
 import FilterSidebar from './FilterSidebar';
 import ChatBox from './ChatBox';
+import StatCard from './StatCard';
+import CredentialSubmission from './CredentialSubmission';
+import WithdrawalModal from './WithdrawalModal';
 
 export {
   Hero,
@@ -20,4 +23,7 @@ export {
   FilterSidebar,
   Footer,
   ChatBox,
+  StatCard,
+  CredentialSubmission,
+  WithdrawalModal,
 };

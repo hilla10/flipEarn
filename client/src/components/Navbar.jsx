@@ -49,7 +49,7 @@ const Navbar = () => {
             Messages{' '}
           </Link>
           <Link
-            to={user ? '/my-listing' : '#'}
+            to={user ? '/my-listings' : '#'}
             onClick={() => (user ? scrollTo(0, 0) : openSignIn())}>
             {' '}
             My Listings{' '}
