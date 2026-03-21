@@ -1,8 +1,8 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from 'react';
 import { dummyOrders, platformIcons } from '../assets/assets';
 import toast from 'react-hot-toast';
 import {
-  CheckCircle,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
