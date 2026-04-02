@@ -14,6 +14,7 @@
   "type": "module",
   "dependencies": {
     "@clerk/express": "^2.0.7",
+    "@imagekit/nodejs": "^7.3.0",
     "@prisma/adapter-neon": "^7.5.0",
     "@prisma/client": "^7.5.0",
     "cors": "^2.8.6",
