@@ -8,7 +8,7 @@ import {
   MyListings,
   MyOrders,
 } from '@pages';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { ChatBox, Navbar } from '@components';
 import { Toaster } from 'react-hot-toast';
@@ -19,9 +19,28 @@ import CredentialChange from '@pages/admin/CredentialChange';
 import CredentialVerify from '@pages/admin/CredentialVerify';
 import Transactions from '@pages/admin/Transactions';
 import Withdrawal from '@pages/admin/Withdrawal';
-
+import { useAuth, useUser } from '@clerk/clerk-react';
+import { useDispatch } from 'react-redux';
+import {
+  getAllPublicListing,
+  getAllUserListing,
+} from './app/features/listingSlice';
 const App = () => {
   const { pathname } = useLocation();
+  const { getToken } = useAuth();
+  const { user, isLoaded } = useUser();
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getAllPublicListing());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isLoaded && user) {
+      dispatch(getAllUserListing({ getToken }));
+    }
+  }, [dispatch, getToken, isLoaded, user]);
 
   return (
     <div>

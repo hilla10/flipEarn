@@ -1,4 +1,4 @@
-import { StatCard,CredentialSubmission,WithdrawalModal } from '@components';
+import { StatCard, CredentialSubmission, WithdrawalModal } from '@components';
 import {
   ArrowDownCircleIcon,
   CheckCircle,
@@ -19,15 +19,24 @@ import {
   EyeOffIcon,
   EyeIcon,
 } from 'lucide-react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { platformIcons } from '../assets/assets';
 import { useState } from 'react';
+import { useAuth } from '@clerk/clerk-react';
+import toast from 'react-hot-toast';
+import api from '@configs/axios';
+import {
+  getAllPublicListing,
+  getAllUserListing,
+} from '@app/features/listingSlice';
 
 const MyListings = () => {
   const { userListings, balance } = useSelector((state) => state.listing);
   const currency = import.meta.env.VITE_CURRENCY || '$';
   const navigate = useNavigate();
+  const { getToken } = useAuth();
+  const dispatch = useDispatch();
 
   const [showCredentialSubmission, setShowCredentialSubmission] =
     useState(null);
@@ -83,9 +92,65 @@ const MyListings = () => {
     }
   };
 
-  const toggleStatus = async (listingId) => {};
-  const deleteListing = async (listingId) => {};
-  const markAsFeatured = async (listingId) => {};
+  const toggleStatus = async (listingId) => {
+    try {
+      toast.loading('Updating listing status...');
+      const token = await getToken();
+      const { data } = await api.put(
+        `/api/listing/${listingId}/status`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      dispatch(getAllUserListing({ getToken }));
+      dispatch(getAllPublicListing());
+      toast.dismissAll();
+      toast.success(data.message);
+    } catch (error) {
+      toast.dismissAll();
+      toast.error(error?.response?.data?.message || error.message);
+    }
+  };
+  const deleteListing = async (listingId) => {
+    try {
+      const confirm = window.confirm(
+        'Are you sure you want to delete this listing? if credentials are changed, new cedentials will be sent to your email.',
+      );
+      if (!confirm) return;
+
+      toast.loading('Delete Listing.....');
+      const token = await getToken();
+      const { data } = await api.delete(
+        `/api/listing/${listingId}`,
+
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      dispatch(getAllUserListing({ getToken }));
+      dispatch(getAllPublicListing());
+      toast.dismissAll();
+      toast.success(data.message);
+    } catch (error) {
+      toast.dismissAll();
+      toast.error(error?.response?.data?.message || error.message);
+    }
+  };
+  const markAsFeatured = async (listingId) => {
+    try {
+      toast.loading('Featuring Listing...');
+      const token = await getToken();
+      const { data } = await api.put(
+        `/api/listing/featured/${listingId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      dispatch(getAllUserListing({ getToken }));
+      dispatch(getAllPublicListing());
+      toast.dismissAll();
+      toast.success(data.message);
+    } catch (error) {
+      toast.dismissAll();
+      toast.error(error?.response?.data?.message || error.message);
+    }
+  };
 
   return (
     <div className='px-6 md:px-16 lg:px-24 xl:px-32 pt-8'>
@@ -156,7 +221,9 @@ const MyListings = () => {
           },
         ].map((item, index) => (
           <div
-          onClick={() => item.label === 'Available' && setShowWithdrawal(true)}
+            onClick={() =>
+              item.label === 'Available' && setShowWithdrawal(true)
+            }
             key={index}
             className='flex flex-1 items-center justify-between p-4 rounded-lg border border-gray-100 cursor-pointer'>
             <div className='  flex items-center gap-3'>
@@ -177,19 +244,19 @@ const MyListings = () => {
         <div className='bg-white rounded-lg border border-gray-200 p-16 text-center'>
           <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4'>
             <Plus className='size-8 text-gray-400' />
-            <h3 className='text-xl font-medium text-gray-800 mb-2'>
-              {' '}
-              No listings yet{' '}
-            </h3>
-            <p className='text-gray-600 mb-6'>
-              Start by creating your first listing
-            </p>
-            <button
-              onClick={() => navigate('/create-listing')}
-              className='bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium'>
-              Create First Listing{' '}
-            </button>
           </div>
+          <h3 className='text-xl font-medium text-gray-800 mb-2'>
+            {' '}
+            No listings yet{' '}
+          </h3>
+          <p className='text-gray-600 mb-6'>
+            Start by creating your first listing
+          </p>
+          <button
+            onClick={() => navigate('/create-listing')}
+            className='bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium'>
+            Create First Listing{' '}
+          </button>
         </div>
       ) : (
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
@@ -213,7 +280,11 @@ const MyListings = () => {
                             <div className='bg-white text-gray-600 text-xs rounded border border-gray-200 p-2 px-3'>
                               {!listing.isCredentialSubmitted && (
                                 <>
-                                  <button onClick={()=>setShowCredentialSubmission(listing)} className='flex items-center gap-2 text-nowrap'>
+                                  <button
+                                    onClick={() =>
+                                      setShowCredentialSubmission(listing)
+                                    }
+                                    className='flex items-center gap-2 text-nowrap'>
                                     Add Credentials
                                   </button>
                                   <hr className='border-gray-200 my-2' />
@@ -314,13 +385,15 @@ const MyListings = () => {
         </div>
       )}
 
-
       {showCredentialSubmission && (
-        <CredentialSubmission listing={showCredentialSubmission} onClose={() => setShowCredentialSubmission(null)} />
+        <CredentialSubmission
+          listing={showCredentialSubmission}
+          onClose={() => setShowCredentialSubmission(null)}
+        />
       )}
-      
+
       {showWithdrawal && (
-        <WithdrawalModal onClose={()=>setShowWithdrawal(null)} />
+        <WithdrawalModal onClose={() => setShowWithdrawal(null)} />
       )}
       {/* Footer */}
       <div className='bg-white border-t border-gray-200 p-4 text-center mt-28'>

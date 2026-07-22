@@ -23,7 +23,7 @@ listingRouter.get('/public', getAllPublicListing);
 listingRouter.get('/user', protect, getAllUserListing);
 listingRouter.put('/:id/status', protect, toggleStatus);
 listingRouter.delete('/:listingId', protect, deleteUserListing);
-listingRouter.post('/add-credentials', protect, addCredential);
+listingRouter.post('/add-credential', protect, addCredential);
 listingRouter.put('/featured/:id', protect, markFeatured);
 listingRouter.get('/user-orders', protect, getAllUserOrders);
 listingRouter.post('/withdraw', protect, withdrawAmount);

@@ -10,7 +10,7 @@ export const addListing = async (req, res) => {
 
     if (req.plan !== 'premium') {
       const listingCount = await prisma.listing.count({
-        whee: { ownerId: userId },
+        where: { ownerId: userId },
       });
 
       if (listingCount >= 5) {
@@ -23,7 +23,7 @@ export const addListing = async (req, res) => {
 
     const accountDetails = JSON.parse(req.body.accountDetails);
 
-    accountDetails.follower_count = parseInt(accountDetails.follower_count);
+    accountDetails.followers_count = parseInt(accountDetails.followers_count);
     accountDetails.engagement_rate = parseInt(accountDetails.engagement_rate);
     accountDetails.monthly_views = parseInt(accountDetails.monthly_views);
     accountDetails.price = parseInt(accountDetails.price);
@@ -131,7 +131,7 @@ export const updateListing = async (req, res) => {
         .json({ message: 'You can upload a maximum of 5 images per listing.' });
     }
 
-    accountDetails.follower_count = parseInt(accountDetails.follower_count);
+    accountDetails.followers_count = parseInt(accountDetails.followers_count);
     accountDetails.engagement_rate = parseInt(accountDetails.engagement_rate);
     accountDetails.monthly_views = parseInt(accountDetails.monthly_views);
     accountDetails.price = parseInt(accountDetails.price);

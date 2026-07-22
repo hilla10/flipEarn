@@ -13,7 +13,7 @@ const LatestListings = () => {
       />
 
       <div className='flex flex-col gap-6 px-6'>
-        {listings.slice(0, 4).map((listing, index) => (
+        {listings?.slice(0, 4).map((listing, index) => (
           <div className='mx-auto w-full max-w-3xl rounded-xl' key={index}>
             <ListingCard listing={listing} />
           </div>

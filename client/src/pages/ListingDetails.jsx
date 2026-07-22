@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { setChat } from '@app/features/chatSlice';
 import { getProfileLink, platformIcons } from '@assets/assets';
+import { useUser } from '@clerk/clerk-react';
 import {
   ArrowLeftIcon,
   ArrowUpRightFromSquare,
@@ -18,11 +19,13 @@ import {
   ShoppingBagIcon,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 const ListingDetails = () => {
   const dispatch = useDispatch();
+  const { user, isLoaded } = useUser();
 
   const navigate = useNavigate();
   const currency = import.meta.env.VITE_CURRENCY || '$';
@@ -48,6 +51,9 @@ const ListingDetails = () => {
   const purchaseAccount = async () => {};
 
   const LoadChatBox = () => {
+    if (!user || !isLoaded) return toast('Please login to chat with seller');
+    if (user.id === listing.ownerId)
+      return toast('You cannot chat on your own listing');
     dispatch(setChat({ listing }));
   };
 

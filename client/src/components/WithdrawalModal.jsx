@@ -1,7 +1,15 @@
 import { X } from 'lucide-react';
 import React, { useState } from 'react';
+import { useAuth } from '@clerk/clerk-react';
+import { useDispatch } from 'react-redux';
+import toast from 'react-hot-toast';
+import api from '@configs/axios';
+import { getAllUserListing } from '@app/features/listingSlice';
 
 const WithdrawalModal = ({ onClose }) => {
+  const { getToken } = useAuth();
+  const dispatch = useDispatch();
+
   const [amount, setAmount] = useState('');
   const [account, setAccount] = useState([
     { type: 'text', name: 'Account Holder Name', value: '' },
@@ -14,6 +22,35 @@ const WithdrawalModal = ({ onClose }) => {
 
   const handleSubmission = async (e) => {
     e.preventDefault();
+
+    try {
+      // check if there is at least one filed
+      if (account.length === 0) {
+        return toast.error('Please add at least one field.');
+      }
+
+      // check all fields are filled
+      for (const field of account) {
+        if (!field.value) {
+          return toast.error(`Please fill in the ${field.name} field`);
+        }
+      }
+
+      const confirm = window.confirm('Are you sure you want to submit?');
+      if (!confirm) return;
+      const token = await getToken();
+      const { data } = await api.post(
+        '/api/listing/withdraw',
+        { account, amount: parseInt(amount) },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast.success(data.message);
+      dispatch(getAllUserListing({ getToken }));
+      onClose();
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
+    }
   };
 
   return (
@@ -35,20 +72,45 @@ const WithdrawalModal = ({ onClose }) => {
         <form
           className='flex flex-col items-start gap-4 p-4 overflow-y-scroll'
           onSubmit={handleSubmission}>
-                  <div className='grid grid-cols-[2fr_3fr_1fr] items-center gap-2'>
-                      Amount
-                  <input className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded outline-indigo-400" required="" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
-                  </div>
+          <div className='grid grid-cols-[2fr_3fr_1fr] items-center gap-2'>
+            Amount
+            <input
+              className='w-full px-2 py-1.5 text-sm border border-gray-300 rounded outline-indigo-400'
+              required=''
+              type='number'
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+          </div>
 
-                  {account.map((field,index) => (
-                    <div key={index} className='grid grid-cols-[2fr_3fr_1fr] items-center gap-2'>
-<label className="text-sm font-medium text-gray-800">{field.name}</label>
-<input className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded outline-indigo-400" type={field.type} value={field.value} onChange={(e) =>setAccount((prev) => prev.map((c,i) => (i=== index ? {...c,value:e.target.value}: c))) } />
-                    </div>
-                  ))}
+          {account.map((field, index) => (
+            <div
+              key={index}
+              className='grid grid-cols-[2fr_3fr_1fr] items-center gap-2'>
+              <label className='text-sm font-medium text-gray-800'>
+                {field.name}
+              </label>
+              <input
+                className='w-full px-2 py-1.5 text-sm border border-gray-300 rounded outline-indigo-400'
+                type={field.type}
+                value={field.value}
+                onChange={(e) =>
+                  setAccount((prev) =>
+                    prev.map((c, i) =>
+                      i === index ? { ...c, value: e.target.value } : c,
+                    ),
+                  )
+                }
+              />
+            </div>
+          ))}
 
-                  {/* Submit Button */}
-                  <button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 mt-4 rounded-md ">Apply for Withdrawal</button>
+          {/* Submit Button */}
+          <button
+            type='submit'
+            className='bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 mt-4 rounded-md '>
+            Apply for Withdrawal
+          </button>
         </form>
       </div>
     </div>

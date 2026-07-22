@@ -1,7 +1,14 @@
-import { Loader2Icon,Upload } from 'lucide-react';
+/* eslint-disable react-hooks/set-state-in-effect */
+import {
+  getAllPublicListing,
+  getAllUserListing,
+} from '@app/features/listingSlice';
+import { useAuth } from '@clerk/clerk-react';
+import api from '@configs/axios';
+import { Loader2Icon, Upload } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const ManageListing = () => {
@@ -9,6 +16,9 @@ const ManageListing = () => {
   const navigate = useNavigate();
 
   const { userListings } = useSelector((state) => state.listing);
+
+  const { getToken } = useAuth();
+  const dispatch = useDispatch();
 
   const [loadingListing, setLoadingListing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -110,6 +120,56 @@ const ManageListing = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    toast.loading('Saving...');
+    const dataCopy = structuredClone(formData);
+
+    try {
+      if (isEditing) {
+        dataCopy.images = formData.images.filter(
+          (img) => typeof img === 'string',
+        );
+
+        const formDataInstance = new FormData();
+        formDataInstance.append('accountDetails', JSON.stringify(dataCopy));
+        formData.images
+          .filter((img) => typeof img !== 'string')
+          .forEach((img) => {
+            formDataInstance.append('images', img);
+          });
+        const token = await getToken();
+
+        const { data } = await api.put('/api/listing', formDataInstance, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        toast.dismissAll();
+        toast.success(data.message);
+        dispatch(getAllUserListing({ getToken }));
+        dispatch(getAllPublicListing());
+        navigate('/my-listings');
+      } else {
+        delete dataCopy.images;
+
+        const formDataInstance = new FormData();
+        formDataInstance.append('accountDetails', JSON.stringify(dataCopy));
+        formData.images.forEach((img) => {
+          formDataInstance.append('images', img);
+        });
+
+        const token = await getToken();
+        const { data } = await api.post('/api/listing', formDataInstance, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        toast.dismissAll();
+        toast.success(data.message);
+        dispatch(getAllUserListing({ getToken }));
+        dispatch(getAllPublicListing());
+        navigate('/my-listings');
+      }
+    } catch (error) {
+      toast.dismissAll();
+      toast.error(error?.response?.data?.message || error.message);
+    }
   };
 
   if (loadingListing) {
@@ -146,18 +206,29 @@ const ManageListing = () => {
                 required={true}
               />
 
-              <SelectField label='Platform *' options={platforms} value={formData.platform} onChange={(v) => handleInputChange('platform', v)} required={true} />
+              <SelectField
+                label='Platform *'
+                options={platforms}
+                value={formData.platform}
+                onChange={(v) => handleInputChange('platform', v)}
+                required={true}
+              />
 
-  <InputField
+              <InputField
                 label='Username/Hanlde'
                 value={formData.username}
                 placeholder='Username'
                 onChange={(v) => handleInputChange('username', v)}
                 required={true}
               />
-  <SelectField label='Niche/Category *' options={niches} value={formData.niche} onChange={(v) => handleInputChange('niche', v)} required={true} />
+              <SelectField
+                label='Niche/Category *'
+                options={niches}
+                value={formData.niche}
+                onChange={(v) => handleInputChange('niche', v)}
+                required={true}
+              />
             </div>
-            
           </Section>
 
           {/* METRICS */}
@@ -165,9 +236,8 @@ const ManageListing = () => {
             <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-6'>
               <InputField
                 label='Followers Count * '
-                type="number"
+                type='number'
                 min={0}
-
                 value={formData.followers_count}
                 placeholder='10000'
                 onChange={(v) => handleInputChange('followers_count', v)}
@@ -175,9 +245,9 @@ const ManageListing = () => {
               />
               <InputField
                 label='Engagement Rate (%) '
-                type="number"
+                type='number'
                 min={0}
-max={100}
+                max={100}
                 value={formData.engagement_rate}
                 placeholder='4'
                 onChange={(v) => handleInputChange('engagement_rate', v)}
@@ -185,9 +255,8 @@ max={100}
               />
               <InputField
                 label='Monthly Views/Impressions '
-                type="number"
+                type='number'
                 min={0}
-
                 value={formData.monthly_views}
                 placeholder='100000'
                 onChange={(v) => handleInputChange('monthly_views', v)}
@@ -195,70 +264,121 @@ max={100}
               />
             </div>
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
-               <InputField
+              <InputField
                 label='Primary Audience Country'
-                type="text"
+                type='text'
                 value={formData.country}
                 placeholder='Ethiopia'
                 onChange={(v) => handleInputChange('country', v)}
                 required={true}
               />
 
-                <SelectField label='Primary Audience Age Range' options={ageRanges} value={formData.age_range} onChange={(v) => handleInputChange('age_range', v)} />
+              <SelectField
+                label='Primary Audience Age Range'
+                options={ageRanges}
+                value={formData.age_range}
+                onChange={(v) => handleInputChange('age_range', v)}
+              />
             </div>
 
-            <div className="space-y-3">
-<CheckboxField label="Account is verified on the platform" checked={formData.verified} onChange={(v) => handleInputChange('verified', v)} />
+            <div className='space-y-3'>
+              <CheckboxField
+                label='Account is verified on the platform'
+                checked={formData.verified}
+                onChange={(v) => handleInputChange('verified', v)}
+              />
 
-<CheckboxField label="Account is monetized" checked={formData.monetized} onChange={(v) => handleInputChange('monetized', v)} />
-
+              <CheckboxField
+                label='Account is monetized'
+                checked={formData.monetized}
+                onChange={(v) => handleInputChange('monetized', v)}
+              />
             </div>
           </Section>
 
           {/* PRICING */}
 
-          <Section title='Pricing & Description
+          <Section
+            title='Pricing & Description
 '>
-    <InputField
-                label='Asking Price (USD) *'
-                type="number"
-                min={0}
-                value={formData.price}
-                placeholder='2500.00'
-                onChange={(v) => handleInputChange('price', v)}
-                required={true}
+            <InputField
+              label='Asking Price (USD) *'
+              type='number'
+              min={0}
+              value={formData.price}
+              placeholder='2500.00'
+              onChange={(v) => handleInputChange('price', v)}
+              required={true}
+            />
+
+            <TextareaField
+              label='Description *'
+              value={formData.description}
+              onChange={(v) => handleInputChange('description', v)}
+              required={true}
+            />
+          </Section>
+
+          {/* IMAGES */}
+          <Section
+            title='Screenshots & Proof
+'>
+            <div className='border-2 border-dashed border-gray-300 rounded-lg p-6 text-center'>
+              <input
+                id='images'
+                multiple
+                accept='image/*'
+                className='hidden'
+                type='file'
+                onChange={handleImageUpload}
               />
+              <Upload className='size-12 text-gray-400 mx-auto mb-4' />
+              <label
+                className='px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 cursor-pointer'
+                htmlFor='images'>
+                Choose Files
+              </label>
+              <p className='text-sm text-gray-500 mt-2'>
+                Upload screenshots or proof of account analytics
+              </p>
+            </div>
 
-              <TextareaField label='Description *'  value={formData.description} onChange={(v) => handleInputChange('description',v)} required={true} />
-</Section>
+            {formData.images.length > 0 && (
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mt-4'>
+                {formData.images.map((img, index) => (
+                  <div className='relative' key={index}>
+                    <img
+                      alt={`image ${index + 1}`}
+                      className='w-full h-24 object-cover rounded-lg'
+                      src={
+                        typeof img === 'string' ? img : URL.createObjectURL(img)
+                      }
+                    />
+                    <button
+                      onClick={() => removeImage(index)}
+                      type='button'
+                      className='absolute -top-2 -right-2 size-6 bg-red-600 text-white rounded-full hover:bg-red-700'>
+                      x
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Section>
 
-{/* IMAGES */}
-<Section title='Screenshots & Proof
-'>
-  <div className='border-2 border-dashed border-gray-300 rounded-lg p-6 text-center'>
-    <input id="images" multiple accept="image/*" className="hidden" type="file" onChange={handleImageUpload} />
-    <Upload className='size-12 text-gray-400 mx-auto mb-4'/>
-    <label className='px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 cursor-pointer' htmlFor='images'> 
-      Choose Files
-       </label>
-       <p className="text-sm text-gray-500 mt-2">Upload screenshots or proof of account analytics</p>
-  </div>
-
-  {formData.images.length > 0 && (
-    <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mt-4'>
-      {formData.images.map((img,index) => (
-        <div className="relative" key={index}>
-          <img alt={`image ${index + 1}`} className="w-full h-24 object-cover rounded-lg" src={typeof img === 'string' ? img : URL.createObjectURL(img)} />
-          <button onClick={() => removeImage(index)} type="button" className="absolute -top-2 -right-2 size-6 bg-red-600 text-white rounded-full hover:bg-red-700">x</button>
-        </div>
-      ) )}
-    </div>
-  )}
-</Section>
-
-<div className="flex justify-end gap-3 text-sm"><button type="button" onClick={() => navigate(-1)} className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button><button type="submit" className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-  {isEditing ? 'Update Listing' : 'Create Listing'}
-  </button></div>
+          <div className='flex justify-end gap-3 text-sm'>
+            <button
+              type='button'
+              onClick={() => navigate(-1)}
+              className='px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors'>
+              Cancel
+            </button>
+            <button
+              type='submit'
+              className='px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors'>
+              {isEditing ? 'Update Listing' : 'Create Listing'}
+            </button>
+          </div>
         </form>
       </div>
     </div>
@@ -302,30 +422,50 @@ const InputField = ({
 
 const SelectField = ({ label, options, value, onChange, required = false }) => (
   <div>
-    <label className='block text-sm font-medium text-gray-700 mb-2'>{label}</label>
-    <select className='w-full px-3 py-1.5 text-gray-600 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300' value={value} onChange={(e) => onChange(e.target.value)} required={required}>
-    
-<option value="">Select...</option>
-{options.map((option) => (
-<option value={option} key={option}>{option}</option>
-
-))}
+    <label className='block text-sm font-medium text-gray-700 mb-2'>
+      {label}
+    </label>
+    <select
+      className='w-full px-3 py-1.5 text-gray-600 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300'
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      required={required}>
+      <option value=''>Select...</option>
+      {options.map((option) => (
+        <option value={option} key={option}>
+          {option}
+        </option>
+      ))}
     </select>
   </div>
 );
 
-const CheckboxField = ({label,checked, onChange,required=false}) => (
-  <label className="flex items-center space-x-2 cursor-pointer">
-    <input className="size-4" type="checkbox" checke={checked} onChange={(e) => onChange(e.target.checked)} required={required} />
-    <span className="text-sm text-gray-700">{label}</span>
-    </label>
-)
+const CheckboxField = ({ label, checked, onChange, required = false }) => (
+  <label className='flex items-center space-x-2 cursor-pointer'>
+    <input
+      className='size-4'
+      type='checkbox'
+      checked={checked}
+      onChange={(e) => onChange(e.target.checked)}
+      required={required}
+    />
+    <span className='text-sm text-gray-700'>{label}</span>
+  </label>
+);
 
-const TextareaField = ({label,value,onChange,required=false}) => (
+const TextareaField = ({ label, value, onChange, required = false }) => (
   <div>
-    <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
-    <textarea rows="5" className="w-full px-3 py-1.5 text-gray-600 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300" required={required} value={value} onChange={(e) => onChange(e.target.value)} />
-      </div>
-)
+    <label className='block text-sm font-medium text-gray-700 mb-2'>
+      {label}
+    </label>
+    <textarea
+      rows='5'
+      className='w-full px-3 py-1.5 text-gray-600 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 border-gray-300'
+      required={required}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  </div>
+);
 
 export default ManageListing;
