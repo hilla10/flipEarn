@@ -21,11 +21,17 @@ export const protect = async (req, res, next) => {
 
 export const protectAdmin = async (req, res, next) => {
   try {
-    const { user } = await clerkClient.users.getUser(await req.auth().userId);
+    const { userId } = getAuth(req);
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const user = await clerkClient.users.getUser(userId);
 
-    const isAdmin = precess.env.ADMIN_EMAILS.split(',').includes(
-      user.emailAddresses[0].emailAddress,
-    );
+    const adminEmails = (process.env.ADMIN_EMAILS || '')
+      .split(',')
+      .map((e) => e.trim().toLowerCase());
+    const primaryEmail = user.primaryEmailAddress?.emailAddress?.toLowerCase();
+    const isAdmin = Boolean(primaryEmail) && adminEmails.includes(primaryEmail);
 
     if (!isAdmin) {
       return res.status(401).json({ message: 'Unauthorized' });

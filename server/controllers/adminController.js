@@ -40,7 +40,7 @@ export const getDashboard = async (req, res) => {
 
     return res.json({
       dashboardData: {
-        totalListing,
+        totalListings,
         totalRevenue,
         activeListings,
         totalUser,
@@ -76,10 +76,16 @@ export const getAllListings = async (req, res) => {
 };
 
 // Change listing status
+const ALLOWED_STATUSES = ['active', 'inactive', 'deleted']; // adjust to actual enum
+
 export const changeStatus = async (req, res) => {
   try {
     const { listingId } = req.params;
     const { status } = req.body;
+
+    if (!ALLOWED_STATUSES.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value' });
+    }
 
     const listing = await prisma.listing.findUnique({
       where: { id: listingId },
@@ -102,7 +108,6 @@ export const changeStatus = async (req, res) => {
       .json({ message: error.message || error.code || 'Server Error' });
   }
 };
-
 // Controller for getting all unverified listings with credentials submitted
 
 export const getAllUnverifiedListings = async (req, res) => {
