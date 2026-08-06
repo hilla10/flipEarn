@@ -7,9 +7,13 @@ const WithdrawalDetail = ({ data, onClose }) => {
   const currency = import.meta.env.VITE_CURRENCY || '$';
   const { getToken } = useAuth();
 
-  const copyToClipboard = ({ name, value }) => {
-    navigator.clipboard.writeText(value || '');
-    toast.success(`${name} copied to clipboard`);
+  const copyToClipboard = async ({ name, value }) => {
+    try {
+      await navigator.clipboard.writeText(value || '');
+      toast.success(`${name} copied to clipboard`);
+    } catch (error) {
+      toast.error(`Could not copy ${name}`);
+    }
   };
 
   const markAsWithdrawn = async () => {
@@ -17,18 +21,18 @@ const WithdrawalDetail = ({ data, onClose }) => {
       toast.loading('Processing...');
       const token = await getToken();
       const response = await api.put(
-        `/api/admin/withdraw-mark/${data.id}`,
+        `/api/admin/withdrawal-mark/${data.id}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
         },
       );
 
-      toast.dismissAll();
+      toast.dismiss('changeStatus');
       toast.success(response.data.message);
       onClose();
     } catch (error) {
-      toast.dismissAll();
+      toast.dismiss('changeStatus');
       toast.error(error?.response?.data?.message || error.message);
       console.log(error);
     }

@@ -29,6 +29,8 @@ const AllListings = () => {
     } catch (error) {
       toast.error(error?.response?.data?.message || error.message);
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,10 +46,10 @@ const AllListings = () => {
         },
       );
       await fetchAllListings();
-      toast.dismissAll();
+      toast.dismiss('changeStatus');
       toast.success(data.message);
     } catch (error) {
-      toast.dismissAll();
+      toast.dismiss('changeStatus');
       toast.error(error?.response?.data?.message || error.message);
       console.log(error);
     }

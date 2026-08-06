@@ -141,7 +141,7 @@ const ManageListing = () => {
         const { data } = await api.put('/api/listing', formDataInstance, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        toast.dismissAll();
+        toast.dismiss('changeStatus');
         toast.success(data.message);
         dispatch(getAllUserListing({ getToken }));
         dispatch(getAllPublicListing());
@@ -160,14 +160,14 @@ const ManageListing = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        toast.dismissAll();
+        toast.dismiss('changeStatus');
         toast.success(data.message);
         dispatch(getAllUserListing({ getToken }));
         dispatch(getAllPublicListing());
         navigate('/my-listings');
       }
     } catch (error) {
-      toast.dismissAll();
+      toast.dismiss('changeStatus');
       toast.error(error?.response?.data?.message || error.message);
     }
   };

@@ -103,10 +103,10 @@ const MyListings = () => {
       );
       dispatch(getAllUserListing({ getToken }));
       dispatch(getAllPublicListing());
-      toast.dismissAll();
+      toast.dismiss('changeStatus');
       toast.success(data.message);
     } catch (error) {
-      toast.dismissAll();
+      toast.dismiss('changeStatus');
       toast.error(error?.response?.data?.message || error.message);
     }
   };
@@ -126,10 +126,10 @@ const MyListings = () => {
       );
       dispatch(getAllUserListing({ getToken }));
       dispatch(getAllPublicListing());
-      toast.dismissAll();
+      toast.dismiss('changeStatus');
       toast.success(data.message);
     } catch (error) {
-      toast.dismissAll();
+      toast.dismiss('changeStatus');
       toast.error(error?.response?.data?.message || error.message);
     }
   };
@@ -144,10 +144,10 @@ const MyListings = () => {
       );
       dispatch(getAllUserListing({ getToken }));
       dispatch(getAllPublicListing());
-      toast.dismissAll();
+      toast.dismiss('changeStatus');
       toast.success(data.message);
     } catch (error) {
-      toast.dismissAll();
+      toast.dismiss('changeStatus');
       toast.error(error?.response?.data?.message || error.message);
     }
   };
