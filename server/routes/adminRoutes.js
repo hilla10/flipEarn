@@ -35,7 +35,7 @@ adminRouter.put(
   changeCredential,
 );
 adminRouter.get('/transactions', protectAdmin, getAllTransactions);
-adminRouter.get('/withdraw-request', protectAdmin, getAllWithdrawRequests);
+adminRouter.get('/withdraw-requests', protectAdmin, getAllWithdrawRequests);
 adminRouter.put('/withdrawal-mark/:id', protectAdmin, markWithdrawalAsPaid);
 
 export default adminRouter;
