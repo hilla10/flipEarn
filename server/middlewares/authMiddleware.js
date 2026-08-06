@@ -1,4 +1,4 @@
-import { clerkClient } from '@clerk/express';
+import { clerkClient,getAuth } from '@clerk/express';
 
 export const protect = async (req, res, next) => {
   try {
@@ -22,6 +22,7 @@ export const protect = async (req, res, next) => {
 export const protectAdmin = async (req, res, next) => {
   try {
     const { userId } = getAuth(req);
+    
     if (!userId) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
