@@ -120,7 +120,7 @@ const ManageListing = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.loading('Saving...');
+    const toastId = toast.loading('Saving...');
     const dataCopy = structuredClone(formData);
 
     try {
@@ -141,8 +141,7 @@ const ManageListing = () => {
         const { data } = await api.put('/api/listing', formDataInstance, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        toast.dismiss('changeStatus');
-        toast.success(data.message);
+        toast.success(data.message, { id: toastId });
         dispatch(getAllUserListing({ getToken }));
         dispatch(getAllPublicListing());
         navigate('/my-listings');
@@ -160,15 +159,15 @@ const ManageListing = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        toast.dismiss('changeStatus');
-        toast.success(data.message);
+        toast.success(data.message, { id: toastId });
         dispatch(getAllUserListing({ getToken }));
         dispatch(getAllPublicListing());
         navigate('/my-listings');
       }
     } catch (error) {
-      toast.dismiss('changeStatus');
-      toast.error(error?.response?.data?.message || error.message);
+      toast.error(error?.response?.data?.message || error.message, {
+        id: toastId,
+      });
     }
   };
 

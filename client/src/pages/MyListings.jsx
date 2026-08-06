@@ -93,8 +93,8 @@ const MyListings = () => {
   };
 
   const toggleStatus = async (listingId) => {
+    const toastId = toast.loading('Updating listing status...');
     try {
-      toast.loading('Updating listing status...');
       const token = await getToken();
       const { data } = await api.put(
         `/api/listing/${listingId}/status`,
@@ -103,21 +103,21 @@ const MyListings = () => {
       );
       dispatch(getAllUserListing({ getToken }));
       dispatch(getAllPublicListing());
-      toast.dismiss('changeStatus');
-      toast.success(data.message);
+      toast.success(data.message, { id: toastId });
     } catch (error) {
-      toast.dismiss('changeStatus');
-      toast.error(error?.response?.data?.message || error.message);
+      toast.error(error?.response?.data?.message || error.message, {
+        id: toastId,
+      });
     }
   };
   const deleteListing = async (listingId) => {
+    const toastId = toast.loading('Delete Listing.....');
     try {
       const confirm = window.confirm(
-        'Are you sure you want to delete this listing? if credentials are changed, new cedentials will be sent to your email.',
+        'Are you sure you want to delete this listing? if credentials are changed, new credentials will be sent to your email.',
       );
       if (!confirm) return;
 
-      toast.loading('Delete Listing.....');
       const token = await getToken();
       const { data } = await api.delete(
         `/api/listing/${listingId}`,
@@ -126,16 +126,17 @@ const MyListings = () => {
       );
       dispatch(getAllUserListing({ getToken }));
       dispatch(getAllPublicListing());
-      toast.dismiss('changeStatus');
-      toast.success(data.message);
+      toast.success(data.message, { id: toastId });
     } catch (error) {
       toast.dismiss('changeStatus');
-      toast.error(error?.response?.data?.message || error.message);
+      toast.error(error?.response?.data?.message || error.message, {
+        id: toastId,
+      });
     }
   };
   const markAsFeatured = async (listingId) => {
+    const toastId = toast.loading('Featuring Listing...');
     try {
-      toast.loading('Featuring Listing...');
       const token = await getToken();
       const { data } = await api.put(
         `/api/listing/featured/${listingId}`,
@@ -144,11 +145,12 @@ const MyListings = () => {
       );
       dispatch(getAllUserListing({ getToken }));
       dispatch(getAllPublicListing());
-      toast.dismiss('changeStatus');
-      toast.success(data.message);
+      toast.success(data.message, { id: toastId });
     } catch (error) {
       toast.dismiss('changeStatus');
-      toast.error(error?.response?.data?.message || error.message);
+      toast.error(error?.response?.data?.message || error.message, {
+        id: toastId,
+      });
     }
   };
 

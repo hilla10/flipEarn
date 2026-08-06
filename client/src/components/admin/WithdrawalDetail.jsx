@@ -18,7 +18,7 @@ const WithdrawalDetail = ({ data, onClose }) => {
 
   const markAsWithdrawn = async () => {
     try {
-      toast.loading('Processing...');
+      toast.loading('Processing...', { id: 'changeStatus' });
       const token = await getToken();
       const response = await api.put(
         `/api/admin/withdrawal-mark/${data.id}`,
