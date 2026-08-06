@@ -13,28 +13,60 @@ const Layout = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { getToken } = useAuth();
   const { isLoaded, user } = useUser();
-
-  const fetchIsAdmin = async () => {
-    try {
-      const token = await getToken();
-      const { data } = await api.get('/api/admin/isAdmin', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setIsAdmin(data.isAdmin);
-    } catch (error) {
-      toast.error(error?.response?.data?.message || error.message);
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [checkedUserId, setCheckedUserId] = useState(null);
 
   useEffect(() => {
-    if (isLoaded && user) {
-      fetchIsAdmin();
+    let active = true;
+
+    setIsAdmin(false);
+    setIsLoading(true);
+    setCheckedUserId(null);
+
+    if (!isLoaded) {
+      return () => {
+        active = false;
+      };
     }
-  }, [isLoaded, user]);
+
+    if (!user) {
+      setIsLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    const requestUserId = user.id;
+
+    const fetchIsAdmin = async () => {
+      try {
+        const token = await getToken();
+        const { data } = await api.get('/api/admin/isAdmin', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (active && requestUserId === user?.id) {
+          setIsAdmin(data.isAdmin);
+          setCheckedUserId(requestUserId);
+        }
+      } catch (error) {
+        if (active && requestUserId === user?.id) {
+          toast.error(error?.response?.data?.message || error.message);
+          setIsAdmin(false);
+          setCheckedUserId(requestUserId);
+        }
+      } finally {
+        if (active && requestUserId === user?.id) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchIsAdmin();
+
+    return () => {
+      active = false;
+    };
+  }, [getToken, isLoaded, user]);
 
   if (isLoaded && !user) {
     return (
@@ -44,7 +76,7 @@ const Layout = () => {
     );
   }
 
-  if (isLoading) {
+  if (isLoading || (isLoaded && user && checkedUserId !== user.id)) {
     return (
       <div className='flex items-center justify-center h-screen'>
         <Loader2Icon className='size-7 text-indigo-500 animate-spin' />

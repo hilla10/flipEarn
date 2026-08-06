@@ -122,14 +122,20 @@ const Dashboard = () => {
           <tbody>
             {dashboardData.recentListings.map((listing, index) => (
               <tr
-                onClick={() => setShowModal(listing)}
                 key={index}
-                className='border-t border-gray-200 hover:bg-indigo-50/50 cursor-pointer'>
+                className='border-t border-gray-200 hover:bg-indigo-50/50'>
                 <td className='pl-4 py-3'>{index + 1}.</td>
-                <td className='px-4 py-3'>{listing.title}</td>
+                <td className='px-4 py-3'>
+                  <button
+                    type='button'
+                    onClick={() => setShowModal(listing)}
+                    className='text-left hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600'>
+                    {listing.title}
+                  </button>
+                </td>
                 <td className='px-4 py-3'>{listing.niche}</td>
                 <td className='px-4 py-3'>{listing.platform}</td>
-                <td className='px-4 py-3'>@{listing.username}</td>
+                <td className='px-4 py-3'>@{listing.username}</td>{' '}
               </tr>
             ))}
           </tbody>
