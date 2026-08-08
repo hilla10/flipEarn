@@ -1,5 +1,6 @@
 import { Inngest } from 'inngest';
 import { prisma } from '../configs/prisma.js';
+import sendEmail from '../configs/nodemailer.js';
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: 'profile-marketplace' });
@@ -85,4 +86,116 @@ const syncUserUpdation = inngest.createFunction(
   },
 );
 
-export const functions = [syncUserCreation, syncUserDeletion, syncUserUpdation];
+// Inngest Function to send purchase email to the customer
+const sendPurchaseEmail = inngest.createFunction(
+  { id: 'send-purchase-email' },
+  { event: 'app/purchase' },
+  async ({ event }) => {
+    const { transaction } = event.data;
+
+    const customer = await prisma.user.findFirst({
+      where: { id: transaction.userId },
+    });
+
+    const listing = await prisma.listing.findFirst({
+      where: { id: transaction.listingId },
+    });
+
+    const credential = await prisma.credential.findFirst({
+      where: { listingId: transaction.listingId },
+    });
+
+    await sendEmail({
+      to: customer.email,
+      subject: 'Your account purchase credentials',
+      html: `
+        <h2>Thank you for your purchase.</h2>
+        <p>
+          Your account purchase of @${listing.username} on ${listing.platform} is complete.
+          Below are the credentials associated with your order.
+        </p>
+        <h3>Credentials</h3>
+        <div>
+          ${credential.updatedCredential
+            .map(
+              (cred) => `
+            <p><strong>${cred.name}:</strong> ${cred.value}</p>
+          `,
+            )
+            .join('')}
+        </div>
+        <p>
+          If you have any questions, please contact our support team at
+          <a href="mailto:hillaman592@gmail.com">support@gmail.com</a>.
+        </p>
+      `,
+    });
+  },
+);
+
+// Inngest Function to send new credentials for deleted listings
+
+const sendNewCredentials = inngest.createFunction(
+  { id: 'send-new-credentials' },
+  { event: '/app/listing-deleted' },
+
+  async ({ event }) => {
+    const { listing, listingId } = event.data;
+
+    const newCredential = await prisma.credential.findFirst({
+      where: { listingId },
+    });
+
+    if (newCredential) {
+      await sendEmail({
+        to: listing.owner.email,
+        subject: 'Updated credentials for your deleted listing',
+        html: `
+        <h2>Updated credentials for your deleted listing</h2>
+        <p>
+          The credentials for the listing titled <strong>${listing.title}</strong>
+          (${listing.platform}) have been updated successfully.
+        </p>
+        <p>
+          Username: <strong>${listing.username}</strong>
+        </p>
+
+        <h3>New Credentials</h3>
+        <div>
+          ${newCredential.updatedCredential
+            .map(
+              (cred) => `
+            <p><strong>${cred.name}:</strong> ${cred.value}</p>
+          `,
+            )
+            .join('')}
+        </div>
+
+        <h3>Previous Credentials</h3>
+        <div>
+          ${newCredential.originalCredential
+            .map(
+              (cred) => `
+            <p><strong>${cred.name}:</strong> ${cred.value}</p>
+          `,
+            )
+            .join('')}
+        </div>
+
+        <p>
+          If you have any questions, please contact our support team at
+          <a href="mailto:hillaman592@gmail.com">support@gmail.com</a>.
+        </p>
+        `,
+      });
+    }
+  },
+);
+
+export const functions = [
+  syncUserCreation,
+  syncUserDeletion,
+  syncUserUpdation,
+  sendPurchaseEmail,
+  sendNewCredentials,
+];

@@ -13,6 +13,7 @@ const WithdrawalDetail = ({ data, onClose }) => {
       toast.success(`${name} copied to clipboard`);
     } catch (error) {
       toast.error(`Could not copy ${name}`);
+      console.log(error)
     }
   };
 

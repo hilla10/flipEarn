@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { setChat } from '@app/features/chatSlice';
 import { getProfileLink, platformIcons } from '@assets/assets';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useClerk, useAuth } from '@clerk/clerk-react';
+import api from '@configs/axios';
 import {
   ArrowLeftIcon,
   ArrowUpRightFromSquare,
@@ -26,6 +27,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 const ListingDetails = () => {
   const dispatch = useDispatch();
   const { user, isLoaded } = useUser();
+  const { openSignIn } = useClerk();
+  const { getToken } = useAuth();
 
   const navigate = useNavigate();
   const currency = import.meta.env.VITE_CURRENCY || '$';
@@ -48,7 +51,28 @@ const ListingDetails = () => {
     setCurrent((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
-  const purchaseAccount = async () => {};
+  const purchaseAccount = async () => {
+    try {
+      if (!user) {
+        return openSignIn();
+      }
+
+      toast.loading('Creating Payment Link...', { id: 'changeStatus' });
+      const token = await getToken();
+      const { data } = await api.get(
+        `/api/listing/purchase-account/${listing.id}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      toast.dismiss('changeStatus');
+
+      window.location.href = data.paymentLink;
+    } catch (error) {
+      toast.dismiss('changeStatus');
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
+    }
+  };
 
   const LoadChatBox = () => {
     if (!user || !isLoaded) return toast('Please login to chat with seller');
