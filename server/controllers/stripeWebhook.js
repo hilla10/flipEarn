@@ -32,40 +32,42 @@ export const stripeWebhook = async (request, response) => {
     // Handle the event
     switch (event.type) {
       case 'payment_intent.succeeded':
-          const paymentIntent = event.data.object;
-          const sessionList = await stripeInstance.checkout.sessions.list({
-            payment_intent: paymentIntent.id,
-            limit: 1,
+        const paymentIntent = event.data.object;
+        const sessionList = await stripeInstance.checkout.sessions.list({
+          payment_intent: paymentIntent.id,
+          limit: 1,
+        });
+
+        const session = sessionList?.data?.[0];
+
+        if (!session) {
+          console.log(
+            `No Checkout Session for payment_intent ${paymentIntent.id}`,
+          );
+          break;
+        }
+
+        if (!session.metadata || typeof session.metadata !== 'object') {
+          console.log(
+            `Checkout Session for payment_intent ${paymentIntent.id} missing metadata`,
+          );
+          break;
+        }
+
+        const { transactionId, appId } = session.metadata;
+
+        if (!transactionId || !appId) {
+          console.log(
+            `Checkout Session metadata missing transactionId or appId for payment_intent ${paymentIntent.id}`,
+          );
+          break;
+        }
+
+        if (appId === 'flipEarn' && transactionId) {
+          const transaction = await prisma.transaction.update({
+            where: { id: transactionId },
+            data: { isPaid: true },
           });
-
-          const session = sessionList?.data?.[0];
-
-          if (!session) {
-            console.log(`No Checkout Session for payment_intent ${paymentIntent.id}`);
-            break;
-          }
-
-          if (!session.metadata || typeof session.metadata !== 'object') {
-            console.log(
-              `Checkout Session for payment_intent ${paymentIntent.id} missing metadata`,
-            );
-            break;
-          }
-
-          const { transactionId, appId } = session.metadata;
-
-          if (!transactionId || !appId) {
-            console.log(
-              `Checkout Session metadata missing transactionId or appId for payment_intent ${paymentIntent.id}`,
-            );
-            break;
-          }
-
-          if (appId === 'flipEarn' && transactionId) {
-            const transaction = await prisma.transaction.update({
-              where: { id: transactionId },
-              data: { isPaid: true },
-            });
 
           //   Send new Credentials to the buyer using the email address;
           await inngest.send({
