@@ -8758,6 +8758,7 @@ export namespace Prisma {
     stripeSessionId: string | null
     stripeCheckoutUrl: string | null
     stripeSessionExpiry: Date | null
+    stripeIdempotencyKey: string | null
     createdAt: Date | null
   }
 
@@ -8772,6 +8773,7 @@ export namespace Prisma {
     stripeSessionId: string | null
     stripeCheckoutUrl: string | null
     stripeSessionExpiry: Date | null
+    stripeIdempotencyKey: string | null
     createdAt: Date | null
   }
 
@@ -8786,6 +8788,7 @@ export namespace Prisma {
     stripeSessionId: number
     stripeCheckoutUrl: number
     stripeSessionExpiry: number
+    stripeIdempotencyKey: number
     createdAt: number
     _all: number
   }
@@ -8810,6 +8813,7 @@ export namespace Prisma {
     stripeSessionId?: true
     stripeCheckoutUrl?: true
     stripeSessionExpiry?: true
+    stripeIdempotencyKey?: true
     createdAt?: true
   }
 
@@ -8824,6 +8828,7 @@ export namespace Prisma {
     stripeSessionId?: true
     stripeCheckoutUrl?: true
     stripeSessionExpiry?: true
+    stripeIdempotencyKey?: true
     createdAt?: true
   }
 
@@ -8838,6 +8843,7 @@ export namespace Prisma {
     stripeSessionId?: true
     stripeCheckoutUrl?: true
     stripeSessionExpiry?: true
+    stripeIdempotencyKey?: true
     createdAt?: true
     _all?: true
   }
@@ -8939,6 +8945,7 @@ export namespace Prisma {
     stripeSessionId: string | null
     stripeCheckoutUrl: string | null
     stripeSessionExpiry: Date | null
+    stripeIdempotencyKey: string | null
     createdAt: Date
     _count: TransactionCountAggregateOutputType | null
     _avg: TransactionAvgAggregateOutputType | null
@@ -8972,6 +8979,7 @@ export namespace Prisma {
     stripeSessionId?: boolean
     stripeCheckoutUrl?: boolean
     stripeSessionExpiry?: boolean
+    stripeIdempotencyKey?: boolean
     createdAt?: boolean
     listing?: boolean | ListingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["transaction"]>
@@ -8987,6 +8995,7 @@ export namespace Prisma {
     stripeSessionId?: boolean
     stripeCheckoutUrl?: boolean
     stripeSessionExpiry?: boolean
+    stripeIdempotencyKey?: boolean
     createdAt?: boolean
     listing?: boolean | ListingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["transaction"]>
@@ -9002,6 +9011,7 @@ export namespace Prisma {
     stripeSessionId?: boolean
     stripeCheckoutUrl?: boolean
     stripeSessionExpiry?: boolean
+    stripeIdempotencyKey?: boolean
     createdAt?: boolean
     listing?: boolean | ListingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["transaction"]>
@@ -9017,10 +9027,11 @@ export namespace Prisma {
     stripeSessionId?: boolean
     stripeCheckoutUrl?: boolean
     stripeSessionExpiry?: boolean
+    stripeIdempotencyKey?: boolean
     createdAt?: boolean
   }
 
-  export type TransactionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "listingId" | "ownerId" | "userId" | "amount" | "isPaid" | "status" | "stripeSessionId" | "stripeCheckoutUrl" | "stripeSessionExpiry" | "createdAt", ExtArgs["result"]["transaction"]>
+  export type TransactionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "listingId" | "ownerId" | "userId" | "amount" | "isPaid" | "status" | "stripeSessionId" | "stripeCheckoutUrl" | "stripeSessionExpiry" | "stripeIdempotencyKey" | "createdAt", ExtArgs["result"]["transaction"]>
   export type TransactionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     listing?: boolean | ListingDefaultArgs<ExtArgs>
   }
@@ -9047,6 +9058,7 @@ export namespace Prisma {
       stripeSessionId: string | null
       stripeCheckoutUrl: string | null
       stripeSessionExpiry: Date | null
+      stripeIdempotencyKey: string | null
       createdAt: Date
     }, ExtArgs["result"]["transaction"]>
     composites: {}
@@ -9482,6 +9494,7 @@ export namespace Prisma {
     readonly stripeSessionId: FieldRef<"Transaction", 'String'>
     readonly stripeCheckoutUrl: FieldRef<"Transaction", 'String'>
     readonly stripeSessionExpiry: FieldRef<"Transaction", 'DateTime'>
+    readonly stripeIdempotencyKey: FieldRef<"Transaction", 'String'>
     readonly createdAt: FieldRef<"Transaction", 'DateTime'>
   }
     
@@ -11140,6 +11153,7 @@ export namespace Prisma {
     stripeSessionId: 'stripeSessionId',
     stripeCheckoutUrl: 'stripeCheckoutUrl',
     stripeSessionExpiry: 'stripeSessionExpiry',
+    stripeIdempotencyKey: 'stripeIdempotencyKey',
     createdAt: 'createdAt'
   };
 
@@ -11837,6 +11851,7 @@ export namespace Prisma {
     stripeSessionId?: StringNullableFilter<"Transaction"> | string | null
     stripeCheckoutUrl?: StringNullableFilter<"Transaction"> | string | null
     stripeSessionExpiry?: DateTimeNullableFilter<"Transaction"> | Date | string | null
+    stripeIdempotencyKey?: StringNullableFilter<"Transaction"> | string | null
     createdAt?: DateTimeFilter<"Transaction"> | Date | string
     listing?: XOR<ListingScalarRelationFilter, ListingWhereInput>
   }
@@ -11852,6 +11867,7 @@ export namespace Prisma {
     stripeSessionId?: SortOrderInput | SortOrder
     stripeCheckoutUrl?: SortOrderInput | SortOrder
     stripeSessionExpiry?: SortOrderInput | SortOrder
+    stripeIdempotencyKey?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     listing?: ListingOrderByWithRelationInput
   }
@@ -11859,7 +11875,7 @@ export namespace Prisma {
   export type TransactionWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     stripeSessionId?: string
-    listingId_userId_status?: TransactionListingIdUserIdStatusCompoundUniqueInput
+    stripeIdempotencyKey?: string
     AND?: TransactionWhereInput | TransactionWhereInput[]
     OR?: TransactionWhereInput[]
     NOT?: TransactionWhereInput | TransactionWhereInput[]
@@ -11873,7 +11889,7 @@ export namespace Prisma {
     stripeSessionExpiry?: DateTimeNullableFilter<"Transaction"> | Date | string | null
     createdAt?: DateTimeFilter<"Transaction"> | Date | string
     listing?: XOR<ListingScalarRelationFilter, ListingWhereInput>
-  }, "id" | "stripeSessionId" | "listingId_userId_status">
+  }, "id" | "stripeSessionId" | "stripeIdempotencyKey">
 
   export type TransactionOrderByWithAggregationInput = {
     id?: SortOrder
@@ -11886,6 +11902,7 @@ export namespace Prisma {
     stripeSessionId?: SortOrderInput | SortOrder
     stripeCheckoutUrl?: SortOrderInput | SortOrder
     stripeSessionExpiry?: SortOrderInput | SortOrder
+    stripeIdempotencyKey?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _count?: TransactionCountOrderByAggregateInput
     _avg?: TransactionAvgOrderByAggregateInput
@@ -11908,6 +11925,7 @@ export namespace Prisma {
     stripeSessionId?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
     stripeCheckoutUrl?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
     stripeSessionExpiry?: DateTimeNullableWithAggregatesFilter<"Transaction"> | Date | string | null
+    stripeIdempotencyKey?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Transaction"> | Date | string
   }
 
@@ -12546,6 +12564,7 @@ export namespace Prisma {
     stripeSessionId?: string | null
     stripeCheckoutUrl?: string | null
     stripeSessionExpiry?: Date | string | null
+    stripeIdempotencyKey?: string | null
     createdAt?: Date | string
     listing: ListingCreateNestedOneWithoutTransactionsInput
   }
@@ -12561,6 +12580,7 @@ export namespace Prisma {
     stripeSessionId?: string | null
     stripeCheckoutUrl?: string | null
     stripeSessionExpiry?: Date | string | null
+    stripeIdempotencyKey?: string | null
     createdAt?: Date | string
   }
 
@@ -12574,6 +12594,7 @@ export namespace Prisma {
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
     stripeSessionExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    stripeIdempotencyKey?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     listing?: ListingUpdateOneRequiredWithoutTransactionsNestedInput
   }
@@ -12589,6 +12610,7 @@ export namespace Prisma {
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
     stripeSessionExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    stripeIdempotencyKey?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -12603,6 +12625,7 @@ export namespace Prisma {
     stripeSessionId?: string | null
     stripeCheckoutUrl?: string | null
     stripeSessionExpiry?: Date | string | null
+    stripeIdempotencyKey?: string | null
     createdAt?: Date | string
   }
 
@@ -12616,6 +12639,7 @@ export namespace Prisma {
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
     stripeSessionExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    stripeIdempotencyKey?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -12630,6 +12654,7 @@ export namespace Prisma {
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
     stripeSessionExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    stripeIdempotencyKey?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -13283,12 +13308,6 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
-  export type TransactionListingIdUserIdStatusCompoundUniqueInput = {
-    listingId: string
-    userId: string
-    status: $Enums.TransactionStatus
-  }
-
   export type TransactionCountOrderByAggregateInput = {
     id?: SortOrder
     listingId?: SortOrder
@@ -13300,6 +13319,7 @@ export namespace Prisma {
     stripeSessionId?: SortOrder
     stripeCheckoutUrl?: SortOrder
     stripeSessionExpiry?: SortOrder
+    stripeIdempotencyKey?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -13318,6 +13338,7 @@ export namespace Prisma {
     stripeSessionId?: SortOrder
     stripeCheckoutUrl?: SortOrder
     stripeSessionExpiry?: SortOrder
+    stripeIdempotencyKey?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -13332,6 +13353,7 @@ export namespace Prisma {
     stripeSessionId?: SortOrder
     stripeCheckoutUrl?: SortOrder
     stripeSessionExpiry?: SortOrder
+    stripeIdempotencyKey?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -14585,6 +14607,7 @@ export namespace Prisma {
     stripeSessionId?: string | null
     stripeCheckoutUrl?: string | null
     stripeSessionExpiry?: Date | string | null
+    stripeIdempotencyKey?: string | null
     createdAt?: Date | string
   }
 
@@ -14598,6 +14621,7 @@ export namespace Prisma {
     stripeSessionId?: string | null
     stripeCheckoutUrl?: string | null
     stripeSessionExpiry?: Date | string | null
+    stripeIdempotencyKey?: string | null
     createdAt?: Date | string
   }
 
@@ -14696,6 +14720,7 @@ export namespace Prisma {
     stripeSessionId?: StringNullableFilter<"Transaction"> | string | null
     stripeCheckoutUrl?: StringNullableFilter<"Transaction"> | string | null
     stripeSessionExpiry?: DateTimeNullableFilter<"Transaction"> | Date | string | null
+    stripeIdempotencyKey?: StringNullableFilter<"Transaction"> | string | null
     createdAt?: DateTimeFilter<"Transaction"> | Date | string
   }
 
@@ -15704,6 +15729,7 @@ export namespace Prisma {
     stripeSessionId?: string | null
     stripeCheckoutUrl?: string | null
     stripeSessionExpiry?: Date | string | null
+    stripeIdempotencyKey?: string | null
     createdAt?: Date | string
   }
 
@@ -15760,6 +15786,7 @@ export namespace Prisma {
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
     stripeSessionExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    stripeIdempotencyKey?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -15773,6 +15800,7 @@ export namespace Prisma {
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
     stripeSessionExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    stripeIdempotencyKey?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -15786,6 +15814,7 @@ export namespace Prisma {
     stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
     stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
     stripeSessionExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    stripeIdempotencyKey?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

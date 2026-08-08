@@ -207,6 +207,7 @@ exports.Prisma.TransactionScalarFieldEnum = {
   stripeSessionId: 'stripeSessionId',
   stripeCheckoutUrl: 'stripeCheckoutUrl',
   stripeSessionExpiry: 'stripeSessionExpiry',
+  stripeIdempotencyKey: 'stripeIdempotencyKey',
   createdAt: 'createdAt'
 };
 

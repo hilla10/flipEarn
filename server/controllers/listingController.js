@@ -450,14 +450,14 @@ export const purchaseAccount = async (req, res) => {
       const target = error.meta?.target;
       const isUniqueConflict =
         error.code === 'P2002' &&
-        ((Array.isArray(target) &&
-          ['listingId', 'userId', 'status'].every((field) =>
-            target.includes(field),
-          )) ||
+        (error.meta?.target?.includes?.(
+          'Transaction_pending_listing_user_unique',
+        ) ||
+          (Array.isArray(target) &&
+            ['listingId', 'userId'].every((field) => target.includes(field))) ||
           (typeof target === 'string' &&
             target.includes('listingId') &&
-            target.includes('userId') &&
-            target.includes('status')));
+            target.includes('userId')));
 
       if (isUniqueConflict) {
         transaction = await prisma.transaction.findFirst({
@@ -521,10 +521,21 @@ export const purchaseAccount = async (req, res) => {
     );
 
     if (!transaction.stripeIdempotencyKey) {
-      transaction = await prisma.transaction.update({
-        where: { id: transaction.id },
-        data: { stripeIdempotencyKey: randomUUID() },
+      const newIdempotencyKey = randomUUID();
+      const updateResult = await prisma.transaction.updateMany({
+        where: { id: transaction.id, stripeIdempotencyKey: null },
+        data: { stripeIdempotencyKey: newIdempotencyKey },
       });
+
+      transaction = await prisma.transaction.findUnique({
+        where: { id: transaction.id },
+      });
+
+      if (!transaction?.stripeIdempotencyKey) {
+        return res
+          .status(500)
+          .json({ message: 'Unable to reserve checkout idempotency key' });
+      }
     }
 
     let session;
@@ -568,7 +579,15 @@ export const purchaseAccount = async (req, res) => {
 
       return res.json({ paymentLink: session.url });
     } catch (error) {
-      if (transaction) {
+      const stripeErrorType = error?.type;
+      const deterministicStripeFailures = new Set([
+        'StripeInvalidRequestError',
+        'StripeAuthenticationError',
+        'StripePermissionError',
+        'StripeSignatureVerificationError',
+      ]);
+
+      if (transaction && deterministicStripeFailures.has(stripeErrorType)) {
         await prisma.transaction.update({
           where: { id: transaction.id },
           data: { status: 'failed' },
