@@ -120,6 +120,8 @@ const sendPurchaseEmail = inngest.createFunction(
       where: { listingId: transaction.listingId },
     });
 
+    const supportEmail = process.env.SENDER_EMAIL || 'support@example.com';
+
     await sendEmail({
       to: customer.email,
       subject: 'Your account purchase credentials',
@@ -145,7 +147,7 @@ const sendPurchaseEmail = inngest.createFunction(
         </div>
         <p>
           If you have any questions, please contact our support team at
-          <a href="mailto:hillaman592@gmail.com">support@gmail.com</a>.
+          <a href="mailto:${supportEmail}">${escapeHtml(supportEmail)}</a>.
         </p>
       `,
     });
@@ -165,6 +167,8 @@ const sendNewCredentials = inngest.createFunction(
     });
 
     if (newCredential) {
+      const supportEmail = process.env.SENDER_EMAIL || 'support@example.com';
+
       await sendEmail({
         to: listing.owner.email,
         subject: 'Updated credentials for your deleted listing',
@@ -208,7 +212,7 @@ const sendNewCredentials = inngest.createFunction(
 
         <p>
           If you have any questions, please contact our support team at
-          <a href="mailto:hillaman592@gmail.com">support@gmail.com</a>.
+          <a href="mailto:${supportEmail}">${escapeHtml(supportEmail)}</a>.
         </p>
         `,
       });

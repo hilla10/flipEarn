@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Loader2Icon } from 'lucide-react';
 
 const Loading = () => {
   const { nextUrl } = useParams();
