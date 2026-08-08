@@ -2,6 +2,21 @@ import { Inngest } from 'inngest';
 import { prisma } from '../configs/prisma.js';
 import sendEmail from '../configs/nodemailer.js';
 
+// Helper to escape values inserted into HTML emails
+const escapeHtml = (unsafe) => {
+  if (unsafe === null || unsafe === undefined) return '';
+  return String(unsafe).replace(/[&<>"'\/]/g, (c) => {
+    return {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+      '/': '&#x2F;',
+    }[c];
+  });
+};
+
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: 'profile-marketplace' });
 
@@ -88,8 +103,8 @@ const syncUserUpdation = inngest.createFunction(
 
 // Inngest Function to send purchase email to the customer
 const sendPurchaseEmail = inngest.createFunction(
-  { id: 'send-purchase-email' },
-  { event: 'app/purchase' },
+  { id: 'send-purchase-email', triggers: [{ event: 'app/purchase' }] },
+
   async ({ event }) => {
     const { transaction } = event.data;
 
@@ -111,7 +126,9 @@ const sendPurchaseEmail = inngest.createFunction(
       html: `
         <h2>Thank you for your purchase.</h2>
         <p>
-          Your account purchase of @${listing.username} on ${listing.platform} is complete.
+          Your account purchase of @${escapeHtml(listing.username)} on ${escapeHtml(
+            listing.platform,
+          )} is complete.
           Below are the credentials associated with your order.
         </p>
         <h3>Credentials</h3>
@@ -119,7 +136,9 @@ const sendPurchaseEmail = inngest.createFunction(
           ${credential.updatedCredential
             .map(
               (cred) => `
-            <p><strong>${cred.name}:</strong> ${cred.value}</p>
+            <p><strong>${escapeHtml(cred.name)}:</strong> ${escapeHtml(
+              cred.value,
+            )}</p>
           `,
             )
             .join('')}
@@ -136,8 +155,7 @@ const sendPurchaseEmail = inngest.createFunction(
 // Inngest Function to send new credentials for deleted listings
 
 const sendNewCredentials = inngest.createFunction(
-  { id: 'send-new-credentials' },
-  { event: '/app/listing-deleted' },
+  { id: 'send-new-credentials', triggers: [{ event: '/app/listing-deleted' }] },
 
   async ({ event }) => {
     const { listing, listingId } = event.data;
@@ -153,11 +171,13 @@ const sendNewCredentials = inngest.createFunction(
         html: `
         <h2>Updated credentials for your deleted listing</h2>
         <p>
-          The credentials for the listing titled <strong>${listing.title}</strong>
-          (${listing.platform}) have been updated successfully.
+          The credentials for the listing titled <strong>${escapeHtml(
+            listing.title,
+          )}</strong>
+          (${escapeHtml(listing.platform)}) have been updated successfully.
         </p>
         <p>
-          Username: <strong>${listing.username}</strong>
+          Username: <strong>${escapeHtml(listing.username)}</strong>
         </p>
 
         <h3>New Credentials</h3>
@@ -165,7 +185,9 @@ const sendNewCredentials = inngest.createFunction(
           ${newCredential.updatedCredential
             .map(
               (cred) => `
-            <p><strong>${cred.name}:</strong> ${cred.value}</p>
+            <p><strong>${escapeHtml(cred.name)}:</strong> ${escapeHtml(
+              cred.value,
+            )}</p>
           `,
             )
             .join('')}
@@ -176,7 +198,9 @@ const sendNewCredentials = inngest.createFunction(
           ${newCredential.originalCredential
             .map(
               (cred) => `
-            <p><strong>${cred.name}:</strong> ${cred.value}</p>
+            <p><strong>${escapeHtml(cred.name)}:</strong> ${escapeHtml(
+              cred.value,
+            )}</p>
           `,
             )
             .join('')}

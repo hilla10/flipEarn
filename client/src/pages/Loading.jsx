@@ -6,13 +6,14 @@ const Loading = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (nextUrl) {
-      setTimeout(() => {
-        navigate('/' + nextUrl);
-      }, 6000);
-    }
-  }, []);
+    if (!nextUrl) return;
 
+    const timeoutId = window.setTimeout(() => {
+      navigate(`/${nextUrl}`);
+    }, 6000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [navigate, nextUrl]);
   return (
     <div className='flex justify-center items-center h-[80vh]'>
       <Loader2Icon className='animate-spin text-indigo-600 size-7' />
