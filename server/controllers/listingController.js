@@ -432,19 +432,9 @@ export const purchaseAccount = async (req, res) => {
         .json({ message: "You can't purchase your own listing" });
     }
 
-    let transaction = await prisma.transaction.findFirst({
-      where: {
-        listingId,
-        userId,
-        status: 'pending',
-      },
-    });
+    let transaction;
 
-    if (transaction && transaction.stripeCheckoutUrl) {
-      return res.json({ paymentLink: transaction.stripeCheckoutUrl });
-    }
-
-    if (!transaction) {
+    try {
       transaction = await prisma.transaction.create({
         data: {
           listingId,
@@ -454,6 +444,56 @@ export const purchaseAccount = async (req, res) => {
           status: 'pending',
         },
       });
+    } catch (error) {
+      const target = error.meta?.target;
+      const isUniqueConflict =
+        error.code === 'P2002' &&
+        ((Array.isArray(target) &&
+          ['listingId', 'userId', 'status'].every((field) =>
+            target.includes(field),
+          )) ||
+          (typeof target === 'string' &&
+            target.includes('listingId') &&
+            target.includes('userId') &&
+            target.includes('status')));
+
+      if (isUniqueConflict) {
+        transaction = await prisma.transaction.findFirst({
+          where: {
+            listingId,
+            userId,
+            status: 'pending',
+          },
+        });
+      } else {
+        throw error;
+      }
+    }
+
+    if (transaction?.stripeCheckoutUrl) {
+      const now = new Date();
+      const expiry = transaction.stripeSessionExpiry
+        ? new Date(transaction.stripeSessionExpiry)
+        : null;
+
+      if (expiry && expiry > now) {
+        return res.json({ paymentLink: transaction.stripeCheckoutUrl });
+      }
+
+      await prisma.transaction.update({
+        where: { id: transaction.id },
+        data: {
+          stripeSessionId: null,
+          stripeCheckoutUrl: null,
+          stripeSessionExpiry: null,
+        },
+      });
+    }
+
+    if (!transaction) {
+      return res
+        .status(500)
+        .json({ message: 'Unable to initiate purchase transaction' });
     }
 
     const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -471,7 +511,7 @@ export const purchaseAccount = async (req, res) => {
                 product_data: {
                   name: `Purchasing Account @${listing.username} of ${listing.platform}`,
                 },
-                unit_amount: Math.floor(transaction.amount) * 100,
+                unit_amount: Math.round(transaction.amount * 100),
               },
               quantity: 1,
             },
@@ -493,6 +533,7 @@ export const purchaseAccount = async (req, res) => {
         data: {
           stripeSessionId: session.id,
           stripeCheckoutUrl: session.url,
+          stripeSessionExpiry: new Date(session.expires_at * 1000),
         },
       });
 

@@ -166,7 +166,10 @@ model Transaction {
     status             TransactionStatus  @default(pending)
     stripeSessionId    String?            @unique
     stripeCheckoutUrl  String?
+    stripeSessionExpiry DateTime?
     createdAt          DateTime           @default(now())
+
+    @@unique([listingId, userId, status])
 
     // Relations
     listing Listing @relation(fields: [listingId], references: [id])
