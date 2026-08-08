@@ -1,6 +1,7 @@
 import fs from 'fs';
 import imagekit from '../configs/imagekit.js';
 import { prisma } from '../configs/prisma.js';
+import Stripe from 'stripe';
 
 // Controller for Adding Listing to Database
 
@@ -405,9 +406,65 @@ export const withdrawAmount = async (req, res) => {
 
 export const purchaseAccount = async (req, res) => {
   try {
+    const { userId } = await req.auth();
+    const { listingId } = req.params;
+    const { origin } = req.headers;
+
+    const listing = await prisma.listing.findFirst({
+      where: { id: listingId, status: 'active' },
+    });
+
+    if (!listing) {
+      return res
+        .status(4040)
+        .json({ message: 'Listing not found or not acive' });
+    }
+
+    if (listing.ownerId === userId) {
+      return res
+        .status(400)
+        .json({ message: "You can't purchase your own listing" });
+    }
+
+    const transaction = await prisma.transaction.create({
+      data: {
+        listingId,
+        ownerId: listing.ownerId,
+        userId,
+        amount: listing.price,
+      },
+    });
+
+    const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+    const session = await stripeInstance.checkout.sessions.create({
+      success_url: `${origin}/loading/my-orders`,
+      cancel_url: `${origin}/marketplace`,
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `Purchasing Account @${listing.username} of ${listing.platform}`,
+            },
+            unit_amount: Math.floor(transaction.amount) * 100,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      metadata: {
+        transactionId: transaction.id,
+        appId: 'flipEarn',
+      },
+      expires_at: Math.floor(Date.Now() / 1000) + 30 * 60, // Expires in 30 minutes
+    });
+
+    return res.json({ paymentLink: session.url });
   } catch (error) {
     res
       .status(500)
       .json({ message: error.message || error.code || 'Server Error' });
+    console.log(error);
   }
 };
