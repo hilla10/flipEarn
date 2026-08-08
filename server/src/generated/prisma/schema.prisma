@@ -151,17 +151,29 @@ model Credential {
   createdAt          DateTime @default(now())
 }
 
+enum TransactionStatus {
+  pending
+  paid
+  failed
+}
+
 model Transaction {
-  id        String   @id @default(uuid())
-  listingId String
-  ownerId   String
-  userId    String
-  amount    Float
-  isPaid    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id                  String            @id @default(uuid())
+  listingId           String
+  ownerId             String
+  userId              String
+  amount              Float
+  isPaid              Boolean           @default(false)
+  status              TransactionStatus @default(pending)
+  stripeSessionId     String?           @unique
+  stripeCheckoutUrl   String?
+  stripeSessionExpiry DateTime?
+  createdAt           DateTime          @default(now())
 
   // Relations
   listing Listing @relation(fields: [listingId], references: [id])
+
+  @@unique([listingId, userId, status])
 }
 
 model Withdrawal {

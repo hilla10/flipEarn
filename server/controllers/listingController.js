@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { randomUUID } from 'crypto';
 import imagekit from '../configs/imagekit.js';
 import { prisma } from '../configs/prisma.js';
 import Stripe from 'stripe';
@@ -442,6 +443,7 @@ export const purchaseAccount = async (req, res) => {
           userId,
           amount: listing.price,
           status: 'pending',
+          stripeIdempotencyKey: randomUUID(),
         },
       });
     } catch (error) {
@@ -480,14 +482,29 @@ export const purchaseAccount = async (req, res) => {
         return res.json({ paymentLink: transaction.stripeCheckoutUrl });
       }
 
-      await prisma.transaction.update({
-        where: { id: transaction.id },
+      const newIdempotencyKey = randomUUID();
+      const updateResult = await prisma.transaction.updateMany({
+        where: {
+          id: transaction.id,
+          stripeSessionExpiry: transaction.stripeSessionExpiry,
+        },
         data: {
           stripeSessionId: null,
           stripeCheckoutUrl: null,
           stripeSessionExpiry: null,
+          stripeIdempotencyKey: newIdempotencyKey,
         },
       });
+
+      if (updateResult.count > 0) {
+        transaction = await prisma.transaction.findUnique({
+          where: { id: transaction.id },
+        });
+      } else {
+        transaction = await prisma.transaction.findUnique({
+          where: { id: transaction.id },
+        });
+      }
     }
 
     if (!transaction) {
@@ -497,6 +514,18 @@ export const purchaseAccount = async (req, res) => {
     }
 
     const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+    const amountInCents = parseInt(
+      Number(transaction.amount).toFixed(2).replace('.', ''),
+      10,
+    );
+
+    if (!transaction.stripeIdempotencyKey) {
+      transaction = await prisma.transaction.update({
+        where: { id: transaction.id },
+        data: { stripeIdempotencyKey: randomUUID() },
+      });
+    }
 
     let session;
     try {
@@ -511,7 +540,7 @@ export const purchaseAccount = async (req, res) => {
                 product_data: {
                   name: `Purchasing Account @${listing.username} of ${listing.platform}`,
                 },
-                unit_amount: Math.round(transaction.amount * 100),
+                unit_amount: amountInCents,
               },
               quantity: 1,
             },
@@ -524,7 +553,7 @@ export const purchaseAccount = async (req, res) => {
           expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // Expires in 30 minutes
         },
         {
-          idempotencyKey: transaction.id,
+          idempotencyKey: transaction.stripeIdempotencyKey,
         },
       );
 

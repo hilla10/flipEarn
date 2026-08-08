@@ -107,6 +107,15 @@ export const Status: {
 
 export type Status = (typeof Status)[keyof typeof Status]
 
+
+export const TransactionStatus: {
+  pending: 'pending',
+  paid: 'paid',
+  failed: 'failed'
+};
+
+export type TransactionStatus = (typeof TransactionStatus)[keyof typeof TransactionStatus]
+
 }
 
 export type Platform = $Enums.Platform
@@ -120,6 +129,10 @@ export const Niche: typeof $Enums.Niche
 export type Status = $Enums.Status
 
 export const Status: typeof $Enums.Status
+
+export type TransactionStatus = $Enums.TransactionStatus
+
+export const TransactionStatus: typeof $Enums.TransactionStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -161,7 +174,7 @@ export class PrismaClient<
    * Read more in our [docs](https://pris.ly/d/client).
    */
 
-  constructor(optionsArg ?: Prisma.Subset<ClientOptions, Prisma.PrismaClientOptions>);
+  constructor(optionsArg ?: Prisma.PrismaClientConstructorArgs<ClientOptions>);
   $on<V extends U>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent) => void): PrismaClient;
 
   /**
@@ -234,7 +247,7 @@ export class PrismaClient<
    * 
    * Read more in our [docs](https://www.prisma.io/docs/orm/prisma-client/queries/transactions).
    */
-  $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P], options?: { isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<runtime.Types.Utils.UnwrapTuple<P>>
+  $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P], options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<runtime.Types.Utils.UnwrapTuple<P>>
 
   $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => $Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<R>
 
@@ -371,8 +384,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 7.5.0
-   * Query Engine version: 280c870be64f457428992c43c1f6d557fab6e29e
+   * Prisma Client JS version: 7.9.1
+   * Query Engine version: e922089b7d7502aff4249d5da3420f6fa55fc6ad
    */
   export type PrismaVersion = {
     client: string
@@ -507,6 +520,19 @@ export namespace Prisma {
   };
 
   /**
+   * Resolved type of the argument passed to the `PrismaClient` constructor.
+   *
+   * When called without a narrower options type (the common case), this resolves
+   * to `PrismaClientOptions` directly, which produces a clear TypeScript error
+   * message (`not assignable to parameter of type 'PrismaClientOptions'`) when
+   * the argument is missing or incomplete. When the user supplies a narrower
+   * options type (e.g. via a literal), it falls back to `Subset` to keep
+   * filtering out unknown properties.
+   */
+  export type PrismaClientConstructorArgs<Options extends PrismaClientOptions> =
+    [PrismaClientOptions] extends [Options] ? PrismaClientOptions : Subset<Options, PrismaClientOptions>;
+
+  /**
    * SelectSubset
    * @desc From `T` pick properties that exist in `U`. Simple version of Intersection.
    * Additionally, it validates, if both select and include are present. If the case, it errors.
@@ -538,7 +564,7 @@ export namespace Prisma {
   type XOR<T, U> =
     T extends object ?
     U extends object ?
-      (Without<T, U> & U) | (Without<U, T> & T)
+      ((Without<T, U> & U) | (Without<U, T> & T)) & object
     : U : T
 
 
@@ -1442,11 +1468,26 @@ export namespace Prisma {
       isolationLevel?: Prisma.TransactionIsolationLevel
     }
     /**
-     * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-planetscale`
+     * A driver adapter that PrismaClient uses to connect to your database, such as the ones provided by `@prisma/adapter-pg`, `@prisma/adapter-libsql`, `@prisma/adapter-planetscale`, etc.
+     * 
+     * A driver adapter is **required** unless you connect to your database through Prisma Accelerate (in which case use `accelerateUrl` instead).
+     * 
+     * Learn more: https://pris.ly/d/driver-adapters
+     * 
+     * @example
+     * ```ts
+     * import { PrismaPg } from '@prisma/adapter-pg'
+     * import { PrismaClient } from './generated/prisma/client'
+     * 
+     * const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+     * const prisma = new PrismaClient({ adapter })
+     * ```
      */
     adapter?: runtime.SqlDriverAdapterFactory
     /**
-     * Prisma Accelerate URL allowing the client to connect through Accelerate instead of a direct database.
+     * The Prisma Accelerate connection URL. Use this option to connect to your database through Prisma Accelerate instead of using a driver adapter to connect directly.
+     * 
+     * Learn more: https://pris.ly/d/accelerate
      */
     accelerateUrl?: string
     /**
@@ -8713,6 +8754,10 @@ export namespace Prisma {
     userId: string | null
     amount: number | null
     isPaid: boolean | null
+    status: $Enums.TransactionStatus | null
+    stripeSessionId: string | null
+    stripeCheckoutUrl: string | null
+    stripeSessionExpiry: Date | null
     createdAt: Date | null
   }
 
@@ -8723,6 +8768,10 @@ export namespace Prisma {
     userId: string | null
     amount: number | null
     isPaid: boolean | null
+    status: $Enums.TransactionStatus | null
+    stripeSessionId: string | null
+    stripeCheckoutUrl: string | null
+    stripeSessionExpiry: Date | null
     createdAt: Date | null
   }
 
@@ -8733,6 +8782,10 @@ export namespace Prisma {
     userId: number
     amount: number
     isPaid: number
+    status: number
+    stripeSessionId: number
+    stripeCheckoutUrl: number
+    stripeSessionExpiry: number
     createdAt: number
     _all: number
   }
@@ -8753,6 +8806,10 @@ export namespace Prisma {
     userId?: true
     amount?: true
     isPaid?: true
+    status?: true
+    stripeSessionId?: true
+    stripeCheckoutUrl?: true
+    stripeSessionExpiry?: true
     createdAt?: true
   }
 
@@ -8763,6 +8820,10 @@ export namespace Prisma {
     userId?: true
     amount?: true
     isPaid?: true
+    status?: true
+    stripeSessionId?: true
+    stripeCheckoutUrl?: true
+    stripeSessionExpiry?: true
     createdAt?: true
   }
 
@@ -8773,6 +8834,10 @@ export namespace Prisma {
     userId?: true
     amount?: true
     isPaid?: true
+    status?: true
+    stripeSessionId?: true
+    stripeCheckoutUrl?: true
+    stripeSessionExpiry?: true
     createdAt?: true
     _all?: true
   }
@@ -8870,6 +8935,10 @@ export namespace Prisma {
     userId: string
     amount: number
     isPaid: boolean
+    status: $Enums.TransactionStatus
+    stripeSessionId: string | null
+    stripeCheckoutUrl: string | null
+    stripeSessionExpiry: Date | null
     createdAt: Date
     _count: TransactionCountAggregateOutputType | null
     _avg: TransactionAvgAggregateOutputType | null
@@ -8899,6 +8968,10 @@ export namespace Prisma {
     userId?: boolean
     amount?: boolean
     isPaid?: boolean
+    status?: boolean
+    stripeSessionId?: boolean
+    stripeCheckoutUrl?: boolean
+    stripeSessionExpiry?: boolean
     createdAt?: boolean
     listing?: boolean | ListingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["transaction"]>
@@ -8910,6 +8983,10 @@ export namespace Prisma {
     userId?: boolean
     amount?: boolean
     isPaid?: boolean
+    status?: boolean
+    stripeSessionId?: boolean
+    stripeCheckoutUrl?: boolean
+    stripeSessionExpiry?: boolean
     createdAt?: boolean
     listing?: boolean | ListingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["transaction"]>
@@ -8921,6 +8998,10 @@ export namespace Prisma {
     userId?: boolean
     amount?: boolean
     isPaid?: boolean
+    status?: boolean
+    stripeSessionId?: boolean
+    stripeCheckoutUrl?: boolean
+    stripeSessionExpiry?: boolean
     createdAt?: boolean
     listing?: boolean | ListingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["transaction"]>
@@ -8932,10 +9013,14 @@ export namespace Prisma {
     userId?: boolean
     amount?: boolean
     isPaid?: boolean
+    status?: boolean
+    stripeSessionId?: boolean
+    stripeCheckoutUrl?: boolean
+    stripeSessionExpiry?: boolean
     createdAt?: boolean
   }
 
-  export type TransactionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "listingId" | "ownerId" | "userId" | "amount" | "isPaid" | "createdAt", ExtArgs["result"]["transaction"]>
+  export type TransactionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "listingId" | "ownerId" | "userId" | "amount" | "isPaid" | "status" | "stripeSessionId" | "stripeCheckoutUrl" | "stripeSessionExpiry" | "createdAt", ExtArgs["result"]["transaction"]>
   export type TransactionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     listing?: boolean | ListingDefaultArgs<ExtArgs>
   }
@@ -8958,6 +9043,10 @@ export namespace Prisma {
       userId: string
       amount: number
       isPaid: boolean
+      status: $Enums.TransactionStatus
+      stripeSessionId: string | null
+      stripeCheckoutUrl: string | null
+      stripeSessionExpiry: Date | null
       createdAt: Date
     }, ExtArgs["result"]["transaction"]>
     composites: {}
@@ -9389,6 +9478,10 @@ export namespace Prisma {
     readonly userId: FieldRef<"Transaction", 'String'>
     readonly amount: FieldRef<"Transaction", 'Float'>
     readonly isPaid: FieldRef<"Transaction", 'Boolean'>
+    readonly status: FieldRef<"Transaction", 'TransactionStatus'>
+    readonly stripeSessionId: FieldRef<"Transaction", 'String'>
+    readonly stripeCheckoutUrl: FieldRef<"Transaction", 'String'>
+    readonly stripeSessionExpiry: FieldRef<"Transaction", 'DateTime'>
     readonly createdAt: FieldRef<"Transaction", 'DateTime'>
   }
     
@@ -11043,6 +11136,10 @@ export namespace Prisma {
     userId: 'userId',
     amount: 'amount',
     isPaid: 'isPaid',
+    status: 'status',
+    stripeSessionId: 'stripeSessionId',
+    stripeCheckoutUrl: 'stripeCheckoutUrl',
+    stripeSessionExpiry: 'stripeSessionExpiry',
     createdAt: 'createdAt'
   };
 
@@ -11193,6 +11290,20 @@ export namespace Prisma {
    * Reference to a field of type 'Json'
    */
   export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'TransactionStatus'
+   */
+  export type EnumTransactionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TransactionStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'TransactionStatus[]'
+   */
+  export type ListEnumTransactionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TransactionStatus[]'>
     
 
 
@@ -11722,6 +11833,10 @@ export namespace Prisma {
     userId?: StringFilter<"Transaction"> | string
     amount?: FloatFilter<"Transaction"> | number
     isPaid?: BoolFilter<"Transaction"> | boolean
+    status?: EnumTransactionStatusFilter<"Transaction"> | $Enums.TransactionStatus
+    stripeSessionId?: StringNullableFilter<"Transaction"> | string | null
+    stripeCheckoutUrl?: StringNullableFilter<"Transaction"> | string | null
+    stripeSessionExpiry?: DateTimeNullableFilter<"Transaction"> | Date | string | null
     createdAt?: DateTimeFilter<"Transaction"> | Date | string
     listing?: XOR<ListingScalarRelationFilter, ListingWhereInput>
   }
@@ -11733,12 +11848,18 @@ export namespace Prisma {
     userId?: SortOrder
     amount?: SortOrder
     isPaid?: SortOrder
+    status?: SortOrder
+    stripeSessionId?: SortOrderInput | SortOrder
+    stripeCheckoutUrl?: SortOrderInput | SortOrder
+    stripeSessionExpiry?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     listing?: ListingOrderByWithRelationInput
   }
 
   export type TransactionWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    stripeSessionId?: string
+    listingId_userId_status?: TransactionListingIdUserIdStatusCompoundUniqueInput
     AND?: TransactionWhereInput | TransactionWhereInput[]
     OR?: TransactionWhereInput[]
     NOT?: TransactionWhereInput | TransactionWhereInput[]
@@ -11747,9 +11868,12 @@ export namespace Prisma {
     userId?: StringFilter<"Transaction"> | string
     amount?: FloatFilter<"Transaction"> | number
     isPaid?: BoolFilter<"Transaction"> | boolean
+    status?: EnumTransactionStatusFilter<"Transaction"> | $Enums.TransactionStatus
+    stripeCheckoutUrl?: StringNullableFilter<"Transaction"> | string | null
+    stripeSessionExpiry?: DateTimeNullableFilter<"Transaction"> | Date | string | null
     createdAt?: DateTimeFilter<"Transaction"> | Date | string
     listing?: XOR<ListingScalarRelationFilter, ListingWhereInput>
-  }, "id">
+  }, "id" | "stripeSessionId" | "listingId_userId_status">
 
   export type TransactionOrderByWithAggregationInput = {
     id?: SortOrder
@@ -11758,6 +11882,10 @@ export namespace Prisma {
     userId?: SortOrder
     amount?: SortOrder
     isPaid?: SortOrder
+    status?: SortOrder
+    stripeSessionId?: SortOrderInput | SortOrder
+    stripeCheckoutUrl?: SortOrderInput | SortOrder
+    stripeSessionExpiry?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _count?: TransactionCountOrderByAggregateInput
     _avg?: TransactionAvgOrderByAggregateInput
@@ -11776,6 +11904,10 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"Transaction"> | string
     amount?: FloatWithAggregatesFilter<"Transaction"> | number
     isPaid?: BoolWithAggregatesFilter<"Transaction"> | boolean
+    status?: EnumTransactionStatusWithAggregatesFilter<"Transaction"> | $Enums.TransactionStatus
+    stripeSessionId?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
+    stripeCheckoutUrl?: StringNullableWithAggregatesFilter<"Transaction"> | string | null
+    stripeSessionExpiry?: DateTimeNullableWithAggregatesFilter<"Transaction"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Transaction"> | Date | string
   }
 
@@ -12410,6 +12542,10 @@ export namespace Prisma {
     userId: string
     amount: number
     isPaid?: boolean
+    status?: $Enums.TransactionStatus
+    stripeSessionId?: string | null
+    stripeCheckoutUrl?: string | null
+    stripeSessionExpiry?: Date | string | null
     createdAt?: Date | string
     listing: ListingCreateNestedOneWithoutTransactionsInput
   }
@@ -12421,6 +12557,10 @@ export namespace Prisma {
     userId: string
     amount: number
     isPaid?: boolean
+    status?: $Enums.TransactionStatus
+    stripeSessionId?: string | null
+    stripeCheckoutUrl?: string | null
+    stripeSessionExpiry?: Date | string | null
     createdAt?: Date | string
   }
 
@@ -12430,6 +12570,10 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     isPaid?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSessionExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     listing?: ListingUpdateOneRequiredWithoutTransactionsNestedInput
   }
@@ -12441,6 +12585,10 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     isPaid?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSessionExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -12451,6 +12599,10 @@ export namespace Prisma {
     userId: string
     amount: number
     isPaid?: boolean
+    status?: $Enums.TransactionStatus
+    stripeSessionId?: string | null
+    stripeCheckoutUrl?: string | null
+    stripeSessionExpiry?: Date | string | null
     createdAt?: Date | string
   }
 
@@ -12460,6 +12612,10 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     isPaid?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSessionExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -12470,6 +12626,10 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     isPaid?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSessionExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -13105,6 +13265,30 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type EnumTransactionStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.TransactionStatus | EnumTransactionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TransactionStatus[] | ListEnumTransactionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TransactionStatus[] | ListEnumTransactionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTransactionStatusFilter<$PrismaModel> | $Enums.TransactionStatus
+  }
+
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type TransactionListingIdUserIdStatusCompoundUniqueInput = {
+    listingId: string
+    userId: string
+    status: $Enums.TransactionStatus
+  }
+
   export type TransactionCountOrderByAggregateInput = {
     id?: SortOrder
     listingId?: SortOrder
@@ -13112,6 +13296,10 @@ export namespace Prisma {
     userId?: SortOrder
     amount?: SortOrder
     isPaid?: SortOrder
+    status?: SortOrder
+    stripeSessionId?: SortOrder
+    stripeCheckoutUrl?: SortOrder
+    stripeSessionExpiry?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -13126,6 +13314,10 @@ export namespace Prisma {
     userId?: SortOrder
     amount?: SortOrder
     isPaid?: SortOrder
+    status?: SortOrder
+    stripeSessionId?: SortOrder
+    stripeCheckoutUrl?: SortOrder
+    stripeSessionExpiry?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -13136,11 +13328,39 @@ export namespace Prisma {
     userId?: SortOrder
     amount?: SortOrder
     isPaid?: SortOrder
+    status?: SortOrder
+    stripeSessionId?: SortOrder
+    stripeCheckoutUrl?: SortOrder
+    stripeSessionExpiry?: SortOrder
     createdAt?: SortOrder
   }
 
   export type TransactionSumOrderByAggregateInput = {
     amount?: SortOrder
+  }
+
+  export type EnumTransactionStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TransactionStatus | EnumTransactionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TransactionStatus[] | ListEnumTransactionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TransactionStatus[] | ListEnumTransactionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTransactionStatusWithAggregatesFilter<$PrismaModel> | $Enums.TransactionStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTransactionStatusFilter<$PrismaModel>
+    _max?: NestedEnumTransactionStatusFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type WithdrawalCountOrderByAggregateInput = {
@@ -13676,6 +13896,14 @@ export namespace Prisma {
     connect?: ListingWhereUniqueInput
   }
 
+  export type EnumTransactionStatusFieldUpdateOperationsInput = {
+    set?: $Enums.TransactionStatus
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
   export type ListingUpdateOneRequiredWithoutTransactionsNestedInput = {
     create?: XOR<ListingCreateWithoutTransactionsInput, ListingUncheckedCreateWithoutTransactionsInput>
     connectOrCreate?: ListingCreateOrConnectWithoutTransactionsInput
@@ -13932,6 +14160,48 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumStatusFilter<$PrismaModel>
     _max?: NestedEnumStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumTransactionStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.TransactionStatus | EnumTransactionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TransactionStatus[] | ListEnumTransactionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TransactionStatus[] | ListEnumTransactionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTransactionStatusFilter<$PrismaModel> | $Enums.TransactionStatus
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedEnumTransactionStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TransactionStatus | EnumTransactionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.TransactionStatus[] | ListEnumTransactionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TransactionStatus[] | ListEnumTransactionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumTransactionStatusWithAggregatesFilter<$PrismaModel> | $Enums.TransactionStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTransactionStatusFilter<$PrismaModel>
+    _max?: NestedEnumTransactionStatusFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type ListingCreateWithoutOwnerInput = {
@@ -14311,6 +14581,10 @@ export namespace Prisma {
     userId: string
     amount: number
     isPaid?: boolean
+    status?: $Enums.TransactionStatus
+    stripeSessionId?: string | null
+    stripeCheckoutUrl?: string | null
+    stripeSessionExpiry?: Date | string | null
     createdAt?: Date | string
   }
 
@@ -14320,6 +14594,10 @@ export namespace Prisma {
     userId: string
     amount: number
     isPaid?: boolean
+    status?: $Enums.TransactionStatus
+    stripeSessionId?: string | null
+    stripeCheckoutUrl?: string | null
+    stripeSessionExpiry?: Date | string | null
     createdAt?: Date | string
   }
 
@@ -14414,6 +14692,10 @@ export namespace Prisma {
     userId?: StringFilter<"Transaction"> | string
     amount?: FloatFilter<"Transaction"> | number
     isPaid?: BoolFilter<"Transaction"> | boolean
+    status?: EnumTransactionStatusFilter<"Transaction"> | $Enums.TransactionStatus
+    stripeSessionId?: StringNullableFilter<"Transaction"> | string | null
+    stripeCheckoutUrl?: StringNullableFilter<"Transaction"> | string | null
+    stripeSessionExpiry?: DateTimeNullableFilter<"Transaction"> | Date | string | null
     createdAt?: DateTimeFilter<"Transaction"> | Date | string
   }
 
@@ -15418,6 +15700,10 @@ export namespace Prisma {
     userId: string
     amount: number
     isPaid?: boolean
+    status?: $Enums.TransactionStatus
+    stripeSessionId?: string | null
+    stripeCheckoutUrl?: string | null
+    stripeSessionExpiry?: Date | string | null
     createdAt?: Date | string
   }
 
@@ -15470,6 +15756,10 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     isPaid?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSessionExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -15479,6 +15769,10 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     isPaid?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSessionExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -15488,6 +15782,10 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     amount?: FloatFieldUpdateOperationsInput | number
     isPaid?: BoolFieldUpdateOperationsInput | boolean
+    status?: EnumTransactionStatusFieldUpdateOperationsInput | $Enums.TransactionStatus
+    stripeSessionId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCheckoutUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeSessionExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

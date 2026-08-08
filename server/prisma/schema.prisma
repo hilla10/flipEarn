@@ -164,12 +164,11 @@ model Transaction {
     amount             Float
     isPaid             Boolean            @default(false)
     status             TransactionStatus  @default(pending)
-    stripeSessionId    String?            @unique
-    stripeCheckoutUrl  String?
-    stripeSessionExpiry DateTime?
-    createdAt          DateTime           @default(now())
-
-    @@unique([listingId, userId, status])
+    stripeSessionId      String?            @unique
+    stripeCheckoutUrl    String?
+    stripeSessionExpiry  DateTime?
+    stripeIdempotencyKey String?            @unique
+    createdAt            DateTime           @default(now())
 
     // Relations
     listing Listing @relation(fields: [listingId], references: [id])
