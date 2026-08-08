@@ -408,7 +408,13 @@ export const purchaseAccount = async (req, res) => {
   try {
     const { userId } = await req.auth();
     const { listingId } = req.params;
-    const { origin } = req.headers;
+    const frontendUrl = process.env.FRONTEND_URL;
+
+    if (!frontendUrl) {
+      return res
+        .status(500)
+        .json({ message: 'Server configuration missing FRONTEND_URL' });
+    }
 
     const listing = await prisma.listing.findFirst({
       where: { id: listingId, status: 'active' },
@@ -416,8 +422,8 @@ export const purchaseAccount = async (req, res) => {
 
     if (!listing) {
       return res
-        .status(4040)
-        .json({ message: 'Listing not found or not acive' });
+        .status(404)
+        .json({ message: 'Listing not found or not active' });
     }
 
     if (listing.ownerId === userId) {
@@ -426,45 +432,87 @@ export const purchaseAccount = async (req, res) => {
         .json({ message: "You can't purchase your own listing" });
     }
 
-    const transaction = await prisma.transaction.create({
-      data: {
+    let transaction = await prisma.transaction.findFirst({
+      where: {
         listingId,
-        ownerId: listing.ownerId,
         userId,
-        amount: listing.price,
+        status: 'pending',
       },
     });
+
+    if (transaction && transaction.stripeCheckoutUrl) {
+      return res.json({ paymentLink: transaction.stripeCheckoutUrl });
+    }
+
+    if (!transaction) {
+      transaction = await prisma.transaction.create({
+        data: {
+          listingId,
+          ownerId: listing.ownerId,
+          userId,
+          amount: listing.price,
+          status: 'pending',
+        },
+      });
+    }
 
     const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-    const session = await stripeInstance.checkout.sessions.create({
-      success_url: `${origin}/loading/my-orders`,
-      cancel_url: `${origin}/marketplace`,
-      line_items: [
+    let session;
+    try {
+      session = await stripeInstance.checkout.sessions.create(
         {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: `Purchasing Account @${listing.username} of ${listing.platform}`,
+          success_url: `${frontendUrl}/loading/my-orders`,
+          cancel_url: `${frontendUrl}/marketplace`,
+          line_items: [
+            {
+              price_data: {
+                currency: 'usd',
+                product_data: {
+                  name: `Purchasing Account @${listing.username} of ${listing.platform}`,
+                },
+                unit_amount: Math.floor(transaction.amount) * 100,
+              },
+              quantity: 1,
             },
-            unit_amount: Math.floor(transaction.amount) * 100,
+          ],
+          mode: 'payment',
+          metadata: {
+            transactionId: transaction.id,
+            appId: 'flipEarn',
           },
-          quantity: 1,
+          expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // Expires in 30 minutes
         },
-      ],
-      mode: 'payment',
-      metadata: {
-        transactionId: transaction.id,
-        appId: 'flipEarn',
-      },
-      expires_at: Math.floor(Date.Now() / 1000) + 30 * 60, // Expires in 30 minutes
-    });
+        {
+          idempotencyKey: transaction.id,
+        },
+      );
 
-    return res.json({ paymentLink: session.url });
+      await prisma.transaction.update({
+        where: { id: transaction.id },
+        data: {
+          stripeSessionId: session.id,
+          stripeCheckoutUrl: session.url,
+        },
+      });
+
+      return res.json({ paymentLink: session.url });
+    } catch (error) {
+      if (transaction) {
+        await prisma.transaction.update({
+          where: { id: transaction.id },
+          data: { status: 'failed' },
+        });
+      }
+
+      console.log(error);
+      return res
+        .status(500)
+        .json({ message: error.message || error.code || 'Server Error' });
+    }
   } catch (error) {
     res
       .status(500)
       .json({ message: error.message || error.code || 'Server Error' });
-    console.log(error);
   }
 };
