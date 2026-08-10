@@ -1,7 +1,8 @@
+import { getAllPublicListing } from '@app/features/listingSlice';
 import { FilterSidebar, ListingCard } from '@components';
 import { ArrowLeftIcon, FilterIcon, Loader2Icon } from 'lucide-react';
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const Marketplace = () => {
@@ -19,6 +20,7 @@ const Marketplace = () => {
   });
 
   const { listings, loading, error } = useSelector((state) => state.listing);
+  const dispatch = useDispatch();
 
   const filteredListings = (listings ?? []).filter((listing) => {
     if (filters.platform && filters.platform.length > 0) {
@@ -84,7 +86,18 @@ const Marketplace = () => {
 
   if (error) {
     return (
-      <div className='flex justify-center py-20 text-red-600'>{error}</div>
+      <div className='px-4 md:px-6 lg:px-24 xl:px-32'>
+        <div className='max-w-2xl mx-auto mt-14 bg-white rounded-xl border border-gray-200 p-8 text-center'>
+          <h3 className='text-lg font-semibold'>{error}</h3>
+          <p className='text-sm text-gray-500 mt-2'>Please try again.</p>
+          <button
+            onClick={() => dispatch(getAllPublicListing())}
+            disabled={loading}
+            className='mt-4 inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300'>
+            {loading ? 'Retrying...' : 'Retry'}
+          </button>
+        </div>
+      </div>
     );
   }
 
