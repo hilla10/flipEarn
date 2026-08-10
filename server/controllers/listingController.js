@@ -579,8 +579,6 @@ export const purchaseAccount = async (req, res) => {
           stripeSessionId: session.id,
           stripeCheckoutUrl: session.url,
           stripeSessionExpiry: new Date(session.expires_at * 1000),
-          // status: 'sold',
-          // isPaid: true,
         },
       });
 
