@@ -20,14 +20,14 @@ export const stripeWebhook = async (request, response) => {
   let event;
 
   try {
-    console.log('========== STRIPE WEBHOOK ==========');
-    console.log('EVENT:', event.type);
     // Verify the event using the signature and the endpoint secret
     event = stripeInstance.webhooks.constructEvent(
       request.body,
       signature,
       endpointSecret,
     );
+    console.log('========== STRIPE WEBHOOK ==========');
+    console.log('EVENT:', event.type);
   } catch (err) {
     console.log(`Webhook signature verification failed: ${err.message}`);
     return response.status(400).send(`Webhook Error: ${err.message}`);
@@ -37,10 +37,12 @@ export const stripeWebhook = async (request, response) => {
     // Handle the event
     switch (event.type) {
       case 'checkout.session.completed': {
-        console.log('PAYMENT INTENT:', paymentIntent.id);
-        console.log('SESSION:', session?.id);
-        console.log('METADATA:', session?.metadata);
         const session = event.data.object;
+
+        console.log('SESSION:', session.id);
+        console.log('PAYMENT STATUS:', session.payment_status);
+        console.log('SESSION STATUS:', session.status);
+        console.log('METADATA:', session.metadata);
 
         const { transactionId, appId } = session.metadata || {};
 
@@ -48,6 +50,8 @@ export const stripeWebhook = async (request, response) => {
           console.log('Invalid Checkout Session metadata');
           break;
         }
+
+        console.log('TRANSACTION ID:', transactionId);
 
         const transaction = await prisma.transaction.findUnique({
           where: { id: transactionId },
@@ -58,6 +62,14 @@ export const stripeWebhook = async (request, response) => {
           break;
         }
 
+        console.log('TRANSACTION FOUND:', {
+          id: transaction.id,
+          isPaid: transaction.isPaid,
+          listingId: transaction.listingId,
+          ownerId: transaction.ownerId,
+          amount: transaction.amount,
+        });
+
         // Stripe may send the webhook more than once.
         if (transaction.isPaid) {
           console.log(`Transaction ${transactionId} already processed`);
@@ -65,33 +77,37 @@ export const stripeWebhook = async (request, response) => {
         }
 
         const updatedTransaction = await prisma.$transaction(async (tx) => {
+          // Mark transaction paid
           const updated = await tx.transaction.update({
             where: { id: transactionId },
             data: { isPaid: true },
           });
 
+          // Mark listing sold
           await tx.listing.update({
             where: { id: transaction.listingId },
             data: { status: 'sold' },
           });
+
+          // Add seller earnings
+          await tx.user.update({
+            where: { id: transaction.ownerId },
+            data: {
+              earned: { increment: transaction.amount },
+            },
+          });
+          return updated;
         });
+        console.log('TRANSACTION UPDATED:', updatedTransaction);
 
-        await tx.user.update({
-          where: { id: transaction.ownerId },
-          data: {
-            earned: { increment: transaction.amount },
-          },
-        });
-
-        return updated;
-
+        // Send credentials
         await inngest.send({
           name: 'app/purchase',
           data: {
             transaction: updatedTransaction,
           },
         });
-        console.log('TRANSACTION UPDATED:', transaction);
+
         console.log(`Transaction ${transactionId} successfully completed`);
 
         // if (appId === 'flipEarn' && transactionId) {
