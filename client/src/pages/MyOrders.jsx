@@ -52,11 +52,10 @@ const MyOrders = () => {
   };
 
   useEffect(() => {
-    if (user && isLoaded) {
-      const time = setTimeout(() => {
-        fetchOrders();
-      }, 3000);
-    }
+    if (!user || !isLoaded) return;
+    const timer = setTimeout(() => {
+      fetchOrders();
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, [isLoaded, user]);
