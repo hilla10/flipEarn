@@ -39,19 +39,12 @@ export const stripeWebhook = async (request, response) => {
       case 'checkout.session.completed': {
         const session = event.data.object;
 
-        console.log('SESSION:', session.id);
-        console.log('PAYMENT STATUS:', session.payment_status);
-        console.log('SESSION STATUS:', session.status);
-        console.log('METADATA:', session.metadata);
-
         const { transactionId, appId } = session.metadata || {};
 
         if (appId !== 'flipEarn' || !transactionId) {
           console.log('Invalid Checkout Session metadata');
           break;
         }
-
-        console.log('TRANSACTION ID:', transactionId);
 
         const transaction = await prisma.transaction.findUnique({
           where: { id: transactionId },
@@ -61,14 +54,6 @@ export const stripeWebhook = async (request, response) => {
           console.error(`Transaction ${transactionId} not found`);
           break;
         }
-
-        console.log('TRANSACTION FOUND:', {
-          id: transaction.id,
-          isPaid: transaction.isPaid,
-          listingId: transaction.listingId,
-          ownerId: transaction.ownerId,
-          amount: transaction.amount,
-        });
 
         // Stripe may send the webhook more than once.
         if (transaction.isPaid) {
@@ -83,13 +68,13 @@ export const stripeWebhook = async (request, response) => {
             data: { isPaid: true },
           });
 
-          // Mark listing sold
+          // Mark the listing as sold
           await tx.listing.update({
             where: { id: transaction.listingId },
             data: { status: 'sold' },
           });
 
-          // Add seller earnings
+          // Add the amount to the user's earned balance
           await tx.user.update({
             where: { id: transaction.ownerId },
             data: {
@@ -98,9 +83,8 @@ export const stripeWebhook = async (request, response) => {
           });
           return updated;
         });
-        console.log('TRANSACTION UPDATED:', updatedTransaction);
 
-        // Send credentials
+        //   Send new Credentials to the buyer using the email address;
         await inngest.send({
           name: 'app/purchase',
           data: {
@@ -108,32 +92,6 @@ export const stripeWebhook = async (request, response) => {
           },
         });
 
-        console.log(`Transaction ${transactionId} successfully completed`);
-
-        // if (appId === 'flipEarn' && transactionId) {
-        //   const transaction = await prisma.transaction.update({
-        //     where: { id: transactionId },
-        //     data: { isPaid: true },
-        //   });
-
-        //   //   Send new Credentials to the buyer using the email address;
-        //   await inngest.send({
-        //     name: 'app/purchase',
-        //     data: { transaction },
-        //   });
-
-        //   // Mark the listing as sold
-        //   await prisma.listing.update({
-        //     where: { id: transaction.listingId },
-        //     data: { status: 'sold' },
-        //   });
-
-        //   // Add the amount to the user's earned balance
-        //   await prisma.user.update({
-        //     where: { id: transaction.ownerId },
-        //     data: { earned: { increment: transaction.amount } },
-        //   });
-        // }
         break;
       }
 
