@@ -4,13 +4,15 @@ import api from '../../configs/axios';
 // Get all public listings
 export const getAllPublicListing = createAsyncThunk(
   'listing/getAllPublicListing',
-  async () => {
+  async (_, { rejectWithValue }) => {
     try {
       const { data } = await api.get('/api/listing/public');
       return data;
     } catch (error) {
       console.log(error);
-      return [];
+      return rejectWithValue(
+        error.response?.data || 'Failed to fetch listings',
+      );
     }
   },
 );
@@ -18,17 +20,23 @@ export const getAllPublicListing = createAsyncThunk(
 // Get all user listings
 export const getAllUserListing = createAsyncThunk(
   'listing/getAllUserListing',
-  async ({ getToken }) => {
+  async ({ getToken }, { rejectWithValue }) => {
     try {
       const token = await getToken();
+
       const { data } = await api.get('/api/listing/user', {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       return data;
     } catch (error) {
       console.log(error);
-      return [];
+
+      return rejectWithValue(
+        error.response?.data || 'Failed to fetch user listings',
+      );
     }
   },
 );

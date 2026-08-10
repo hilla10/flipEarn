@@ -1,5 +1,5 @@
 import { FilterSidebar, ListingCard } from '@components';
-import { ArrowLeftIcon, FilterIcon } from 'lucide-react';
+import { ArrowLeftIcon, FilterIcon, Loader2Icon } from 'lucide-react';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -11,8 +11,8 @@ const Marketplace = () => {
   const [showFilterPhone, setShowFilterPhone] = useState(false);
   const [filters, setFilters] = useState({
     platform: null,
-    maxPrice: 100000,
-    minFollowers: 0,
+    maxPrice: null,
+    minFollowers: null,
     niche: null,
     verified: false,
     monetized: false,
@@ -20,21 +20,28 @@ const Marketplace = () => {
 
   const { listings } = useSelector((state) => state.listing);
 
-  const filteredListings = listings.filter((listing) => {
+  const filteredListings = listings?.filter((listing) => {
     if (filters.platform && filters.platform.length > 0) {
       if (!filters.platform.includes(listing.platform)) return false;
     }
 
-    if (filters.maxPrice) {
-      if (listing.price > filters.maxPrice) return false;
+    if (filters.maxPrice !== null) {
+      if (Number(listing.price) > Number(filters.maxPrice)) {
+        return false;
+      }
     }
 
-    if (filters.minFollowers) {
-      if (listing.followers_count < filters.minFollowers) return false;
+    // Minimum followers
+    if (
+      filters.minFollowers !== null &&
+      Number(listing.followers_count) < Number(filters.minFollowers)
+    ) {
+      return false;
     }
 
-    if (filters.niche && filters.niche.length > 0) {
-      if (!filters.niche.includes(listing.niche)) return false;
+    // Niche
+    if (filters.niche?.length > 0 && !filters.niche.includes(listing.niche)) {
+      return false;
     }
 
     if (filters.verified && listing.verified !== filters.verified) return false;
@@ -42,22 +49,38 @@ const Marketplace = () => {
     if (filters.monetized && listing.monetized !== filters.monetized)
       return false;
 
-    if (search) {
-      const trimmed = search.trim();
-      if (
-        !listing.title.toLowerCase().includes(trimmed.toLowerCase()) &&
-        !listing.username.toLowerCase().includes(trimmed.toLowerCase()) &&
-        !listing.description.toLowerCase().includes(trimmed.toLowerCase()) &&
-        !listing.platform.toLowerCase().includes(trimmed.toLowerCase()) &&
-        !listing.niche.toLowerCase().includes(trimmed.toLowerCase())
-      )
+    // Search
+    if (search.trim()) {
+      const query = search.trim().toLowerCase();
+
+      const searchableText = [
+        listing.title,
+        listing.username,
+        listing.description,
+        listing.platform,
+        listing.niche,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      if (!searchableText.includes(query)) {
         return false;
+      }
     }
 
     return true;
   });
 
   const navigate = useNavigate();
+
+  if (listings === null) {
+    return (
+      <div className='flex justify-center py-20'>
+        <Loader2Icon className='size-8 animate-spin' />
+      </div>
+    );
+  }
 
   return (
     <div className='px-6 md:px-16 lg:px-24 xl:px-32 '>
@@ -87,10 +110,10 @@ const Marketplace = () => {
         />
 
         <div className='flex-1 grid xl:grid-cols-2 gap-4'>
-          {filteredListings
+          {[...filteredListings]
             .sort((a, b) => (a.featured ? -1 : b.featured ? 1 : 0))
-            .map((listing, index) => (
-              <ListingCard listing={listing} key={index} />
+            .map((listing) => (
+              <ListingCard listing={listing} key={listing.id} />
             ))}
         </div>
       </div>
