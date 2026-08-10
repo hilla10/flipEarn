@@ -79,7 +79,6 @@ export const getAllPublicListing = async (req, res) => {
       orderBy: { createdAt: 'desc' },
     });
 
-    console.log(listings);
     if (!listings || listings.length === 0) return res.json({ listings: [] });
 
     return res.json({ listings });
@@ -112,7 +111,6 @@ export const getAllUserListing = async (req, res) => {
       available: user.earned - user.withdrawn,
     };
 
-    console.log(listings)
     if (!listings || listings.length === 0)
       return res.json({ listings: [], balance });
     return res.json({ listings, balance });

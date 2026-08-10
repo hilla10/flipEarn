@@ -1,6 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../configs/axios';
 
+const getErrorMessage = (payload, fallback) => {
+  if (typeof payload === 'string') return payload;
+  if (payload?.message) return payload.message;
+  if (payload?.error) return payload.error;
+  return fallback;
+};
+
 // Get all public listings
 export const getAllPublicListing = createAsyncThunk(
   'listing/getAllPublicListing',
@@ -44,13 +51,15 @@ export const getAllUserListing = createAsyncThunk(
 const listingSlice = createSlice({
   name: 'listing',
   initialState: {
-    listings: [],
+    listings: null,
     userListings: [],
     balance: {
       earned: 0,
       withdrawn: 0,
       available: 0,
     },
+    loading: true,
+    error: null,
   },
 
   reducers: {
@@ -60,8 +69,23 @@ const listingSlice = createSlice({
   },
 
   extraReducers: (builder) => {
+    builder.addCase(getAllPublicListing.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
     builder.addCase(getAllPublicListing.fulfilled, (state, action) => {
+      state.loading = false;
+      state.error = null;
       state.listings = action.payload.listings;
+    });
+    builder.addCase(getAllPublicListing.rejected, (state, action) => {
+      state.loading = false;
+      if (state.listings === null) {
+        state.error = getErrorMessage(
+          action.payload,
+          action.error?.message || 'Failed to fetch listings',
+        );
+      }
     });
     builder.addCase(getAllUserListing.fulfilled, (state, action) => {
       state.userListings = action.payload.listings;

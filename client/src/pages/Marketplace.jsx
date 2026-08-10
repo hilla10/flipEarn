@@ -18,9 +18,9 @@ const Marketplace = () => {
     monetized: false,
   });
 
-  const { listings } = useSelector((state) => state.listing);
+  const { listings, loading, error } = useSelector((state) => state.listing);
 
-  const filteredListings = listings?.filter((listing) => {
+  const filteredListings = (listings ?? []).filter((listing) => {
     if (filters.platform && filters.platform.length > 0) {
       if (!filters.platform.includes(listing.platform)) return false;
     }
@@ -74,11 +74,17 @@ const Marketplace = () => {
 
   const navigate = useNavigate();
 
-  if (listings === null) {
+  if (loading && listings === null) {
     return (
       <div className='flex justify-center py-20'>
         <Loader2Icon className='size-8 animate-spin' />
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='flex justify-center py-20 text-red-600'>{error}</div>
     );
   }
 
