@@ -26,6 +26,8 @@ app.use('/api/listing', listingRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/admin', adminRouter);
 
+console.log('working')
+
 app.listen(PORT, () =>
   console.log(`Server is running on http://localhost:${PORT}`),
 );
