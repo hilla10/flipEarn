@@ -7,7 +7,6 @@ import {
   Settings2Icon,
   WalletIcon,
 } from 'lucide-react';
-import { assets } from '../../assets/assets';
 import {useUser} from '@clerk/clerk-react';
 
 const AdminSidebar = () => {

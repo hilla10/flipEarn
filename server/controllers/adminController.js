@@ -291,7 +291,7 @@ export const markWithdrawalAsPaid = async (req, res) => {
       return res.status(404).json({ message: 'Withdrawal request not found' });
     }
 
-    if (withdrawal.isWithdrawan) {
+    if (withdrawal.isWithdrawn) {
       return res
         .status(400)
         .json({ message: 'Withdrawal already marked as paid' });
@@ -299,7 +299,7 @@ export const markWithdrawalAsPaid = async (req, res) => {
 
     await prisma.withdrawal.update({
       where: { id },
-      data: { isWithdrawan: true },
+      data: { isWithdrawn: true },
     });
 
     return res.json({ message: 'Withdrawal marked as paid' });
