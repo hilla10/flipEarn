@@ -76,7 +76,7 @@ export const getAllListings = async (req, res) => {
 };
 
 // Change listing status
-const ALLOWED_STATUSES = ['active', 'inactive', 'deleted']; // adjust to actual enum
+const ALLOWED_STATUSES = ['active', 'inactive', 'ban', 'sold', 'deleted'];
 
 export const changeStatus = async (req, res) => {
   try {
