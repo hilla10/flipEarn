@@ -22,6 +22,8 @@
 
 </div>
 
+> Special thanks to GreatStack for the inspiration and guidance behind this project.
+
 An open-source social media marketplace platform built with React, Tailwind CSS, Node.js, Prisma, PostgreSQL, and Neon. It is designed to help users discover, list, manage, and engage with digital products and marketplace opportunities in a modern social-first experience.
 
 ---
