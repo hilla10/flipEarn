@@ -48,7 +48,8 @@ const FilterSidebar = ({
 
     setFilters({
       platform: null,
-      maxPrice: 100000,
+      minPrice: 0,
+      maxPrice: null,
       minFollowers: 0,
       niche: null,
       verified: false,
@@ -167,43 +168,165 @@ const FilterSidebar = ({
         </div>
 
         {/* Price Range */}
+
         <div>
           <button
+            type='button'
             onClick={() => toggleSection('price')}
             className='flex items-center justify-between w-full mb-3'>
-            <label
-              htmlFor='price-range'
-              className='text-sm font-medium text-gray-800'>
+            <span className='text-sm font-medium text-gray-800'>
               Price Range
-            </label>
+            </span>
+
             <ChevronDown
-              className={`${expandedSections.price ? 'rotate-180' : ''} size-4 transition-transform `}
+              className={`size-4 transition-transform ${
+                expandedSections.price ? 'rotate-180' : ''
+              }`}
             />
           </button>
 
+          {/* Quick price presets */}
           {expandedSections.price && (
-            <div className='space-y-3'>
-              <input
-                type='range'
-                min='0'
-                max='100000'
-                step='100'
-                value={filters.maxPrice || 100000}
-                onChange={(e) =>
+            <div className='space-y-4'>
+              <select
+                value={`${filters.minPrice ?? 0}-${filters.maxPrice ?? 'max'}`}
+                onChange={(e) => {
+                  const [min, max] = e.target.value.split('-');
+
                   onFiltersChange({
                     ...filters,
-                    maxPrice: parseInt(e.target.value),
-                  })
-                }
-                className='w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600'
-              />
+                    minPrice: Number(min),
+                    maxPrice: max === 'max' ? null : Number(max),
+                  });
+                }}
+                className='w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-700 outline-indigo-500 mb-4'>
+                <option value='0-max'>Any Price</option>
+                <option value='0-10000'>Under 10K</option>
+                <option value='10000-50000'>10K - 50K</option>
+                <option value='50000-100000'>50K - 100K</option>
+                <option value='100000-500000'>100K - 500K</option>
+                <option value='500000-1000000'>500K - 1M</option>
+                <option value='1000000-max'>1M+</option>
+              </select>
 
-              <div className='flex items-center justify-between text-sm text-gray-600'>
-                <span>{currency}0</span>
+              {/* Current values */}
+              <div className='flex items-center justify-between text-sm font-medium text-gray-700'>
                 <span>
                   {currency}
-                  {(filters.maxPrice || 100000).toLocaleString()}
+                  {(filters.minPrice ?? 0).toLocaleString()}
                 </span>
+
+                <span>
+                  {filters.maxPrice === null
+                    ? `${currency}1M+`
+                    : `${currency}${filters.maxPrice.toLocaleString()}`}
+                </span>
+              </div>
+
+              {/* Range slider */}
+              <div className='relative h-6'>
+                {/* Track */}
+                <div className='absolute top-1/2 left-0 right-0 h-2 -translate-y-1/2 rounded-lg bg-gray-200' />
+
+                {/* Selected range */}
+                <div
+                  className='absolute top-1/2 h-2 -translate-y-1/2 rounded-lg bg-indigo-600'
+                  style={{
+                    left: `${((filters.minPrice ?? 0) / 1000000) * 100}%`,
+                    right: `${
+                      100 - ((filters.maxPrice ?? 1000000) / 1000000) * 100
+                    }%`,
+                  }}
+                />
+
+                {/* Minimum slider */}
+                <input
+                  type='range'
+                  min='0'
+                  max='1000000'
+                  step='10000'
+                  value={filters.minPrice ?? 0}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+
+                    onFiltersChange({
+                      ...filters,
+                      minPrice: Math.min(value, filters.maxPrice ?? 1000000),
+                    });
+                  }}
+                  className='range-slider'
+                />
+
+                {/* Maximum slider */}
+                <input
+                  type='range'
+                  min='0'
+                  max='1000000'
+                  step='10000'
+                  value={filters.maxPrice ?? 1000000}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+
+                    onFiltersChange({
+                      ...filters,
+                      maxPrice: Math.max(value, filters.minPrice ?? 0),
+                    });
+                  }}
+                  className='range-slider'
+                />
+              </div>
+
+              {/* Min / Max inputs */}
+              <div className='flex gap-3'>
+                <div className='flex-1'>
+                  <label className='block mb-1 text-xs text-gray-500'>
+                    Minimum
+                  </label>
+
+                  <input
+                    type='number'
+                    min='0'
+                    max='1000000'
+                    step='10000'
+                    value={filters.minPrice ?? 0}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+
+                      onFiltersChange({
+                        ...filters,
+                        minPrice: Math.min(value, filters.maxPrice ?? 1000000),
+                      });
+                    }}
+                    className='w-full px-3 py-2 border border-gray-300 rounded-lg outline-indigo-500 text-sm'
+                  />
+                </div>
+
+                <div className='flex-1'>
+                  <label className='block mb-1 text-xs text-gray-500'>
+                    Maximum
+                  </label>
+
+                  <input
+                    type='number'
+                    min='0'
+                    max='1000000'
+                    step='10000'
+                    value={filters.maxPrice ?? ''}
+                    placeholder='No limit'
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      onFiltersChange({
+                        ...filters,
+                        maxPrice:
+                          value === ''
+                            ? null
+                            : Math.max(Number(value), filters.minPrice ?? 0),
+                      });
+                    }}
+                    className='w-full px-3 py-2 border border-gray-300 rounded-lg outline-indigo-500 text-sm'
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -281,7 +404,7 @@ const FilterSidebar = ({
           )}
         </div>
 
-        {/* Vefification Status */}
+        {/* Verification Status */}
         <div>
           <button
             onClick={() => toggleSection('status')}

@@ -12,6 +12,7 @@ const Marketplace = () => {
   const [showFilterPhone, setShowFilterPhone] = useState(false);
   const [filters, setFilters] = useState({
     platform: null,
+    minPrice: 0,
     maxPrice: null,
     minFollowers: null,
     niche: null,
@@ -27,10 +28,11 @@ const Marketplace = () => {
       if (!filters.platform.includes(listing.platform)) return false;
     }
 
-    if (filters.maxPrice !== null) {
-      if (Number(listing.price) > Number(filters.maxPrice)) {
-        return false;
-      }
+    if (
+      filters.maxPrice !== null &&
+      Number(listing.price) > Number(filters.maxPrice)
+    ) {
+      return false;
     }
 
     // Minimum followers
