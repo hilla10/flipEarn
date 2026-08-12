@@ -26,7 +26,7 @@ An open-source social media marketplace platform built with React, Tailwind CSS,
 
 ---
 
-## Overview
+## 🧩 Overview
 
 Social Media Market Places is a modern social commerce and marketplace platform where users can browse listings, manage their own offers, and access secure account workflows in a scalable web application.
 
@@ -43,7 +43,7 @@ Social Media Market Places is a modern social commerce and marketplace platform 
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack <a name="-tech-stack"></a>
 
 ### Frontend
 
@@ -251,3 +251,8 @@ This project is licensed under the MIT License.
 - GitHub: https://github.com/hilla10
 - Portfolio: https://portfolio-rho-gules-15.vercel.app/
 - Linkedin : https://www.linkedin.com/in/hailemichaelnegusse/
+
+```
+⭐ If you like this project, give it a star on GitHub!
+It helps others discover it and keeps the project growing. 🌟
+```
