@@ -2,9 +2,9 @@
 
 <div align="center">
 
-![GitHub license](https://img.shields.io/github/license/hilla10/flipEarn)
-![GitHub last commit](https://img.shields.io/github/last-commit/hilla10/flipEarn)
-![GitHub issues](https://img.shields.io/github/issues/hilla10/flipEarn)
+[![GitHub license](https://img.shields.io/github/license/hilla10/flipEarn)](https://github.com/hilla10/flipEarn)
+[![GitHub last commit](https://img.shields.io/github/last-commit/hilla10/flipEarn)](https://github.com/hilla10/flipEarn)
+[![GitHub issues](https://img.shields.io/github/issues/hilla10/flipEarn)](https://github.com/hilla10/flipEarn)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
 ![Node.js](https://img.shields.io/badge/Node.js-Express-339933?logo=node.js)
 ![Tailwind](https://img.shields.io/badge/Tailwind-CSS-06B6D4?logo=tailwindcss)
