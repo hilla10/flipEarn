@@ -98,7 +98,7 @@ Social Media Market Places is a modern social commerce and marketplace platform 
 
 ![Marketplace Preview](./client/public/marketplace.png)
 
-![Admin Panel Preview](./client/public/admin-panel.png)
+![Admin Panel Preview](./client/public/admin-pannel.png)
 
 ---
 
