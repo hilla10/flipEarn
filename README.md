@@ -2,9 +2,9 @@
 
 <div align="center">
 
-![GitHub license](https://img.shields.io/github/license/hilla10/flipEarn)
-![GitHub last commit](https://img.shields.io/github/last-commit/hilla10/flipEarn)
-![GitHub issues](https://img.shields.io/github/issues/hilla10/flipEarn)
+[![GitHub license](https://img.shields.io/github/license/hilla10/flipEarn)](https://github.com/hilla10/flipEarn)
+[![GitHub last commit](https://img.shields.io/github/last-commit/hilla10/flipEarn)](https://github.com/hilla10/flipEarn)
+[![GitHub issues](https://img.shields.io/github/issues/hilla10/flipEarn)](https://github.com/hilla10/flipEarn)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
 ![Node.js](https://img.shields.io/badge/Node.js-Express-339933?logo=node.js)
 ![Tailwind](https://img.shields.io/badge/Tailwind-CSS-06B6D4?logo=tailwindcss)
@@ -26,7 +26,7 @@ An open-source social media marketplace platform built with React, Tailwind CSS,
 
 ---
 
-## Overview
+## 🧩 Overview
 
 Social Media Market Places is a modern social commerce and marketplace platform where users can browse listings, manage their own offers, and access secure account workflows in a scalable web application.
 
@@ -43,29 +43,29 @@ Social Media Market Places is a modern social commerce and marketplace platform 
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack <a name="-tech-stack"></a>
 
 ### Frontend
 
-- React
-- Vite
-- Tailwind CSS
-- React Router
-- Redux Toolkit
-- Recharts
-- Axios
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
+![React Router](https://img.shields.io/badge/React_Router-7-CA4245?logo=reactrouter&logoColor=white)
+![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-2-764ABC?logo=redux&logoColor=white)
+![Recharts](https://img.shields.io/badge/Recharts-2-22B5BF)
+![Axios](https://img.shields.io/badge/Axios-1-5A29E4?logo=axios&logoColor=white)
 
 ### Backend
 
-- Node.js
-- Express
-- Prisma ORM
-- PostgreSQL / Neon
-- Clerk Auth
-- Stripe
-- ImageKit
-- Nodemailer
-- Inngest
+![Node.js](https://img.shields.io/badge/Node.js-Express-339933?logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?logo=prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?logo=postgresql&logoColor=white)
+![Clerk](https://img.shields.io/badge/Clerk-Auth-6C47FF?logo=clerk&logoColor=white)
+![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?logo=stripe&logoColor=white)
+![ImageKit](https://img.shields.io/badge/ImageKit-Media-5A67D8)
+![Nodemailer](https://img.shields.io/badge/Nodemailer-Email-0F9D58)
+![Inngest](https://img.shields.io/badge/Inngest-Background_Jobs-000000)
 
 ---
 
@@ -251,3 +251,8 @@ This project is licensed under the MIT License.
 - GitHub: https://github.com/hilla10
 - Portfolio: https://portfolio-rho-gules-15.vercel.app/
 - Linkedin : https://www.linkedin.com/in/hailemichaelnegusse/
+
+```
+⭐ If you like this project, give it a star on GitHub!
+It helps others discover it and keeps the project growing. 🌟
+```
