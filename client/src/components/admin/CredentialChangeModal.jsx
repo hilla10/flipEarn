@@ -171,7 +171,6 @@ const CredentialChangeModal = ({ listing, onClose }) => {
             <button
               onClick={changeCredential}
               className='mt-2 text-sm bg-indigo-500 not-disabled:hover:bg-indigo-700 disabled:opacity-50 text-white font-medium py-2 px-5 rounded-md'>
-              Change Credentials
               {isChanged ? 'Chang Credentials' : <LoaderCircleIcon />}
             </button>
           </div>

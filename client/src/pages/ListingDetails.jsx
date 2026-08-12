@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import { setChat } from '@app/features/chatSlice';
 import { getProfileLink, platformIcons } from '@assets/assets';
 import { useUser, useClerk, useAuth } from '@clerk/clerk-react';
@@ -83,10 +82,13 @@ const ListingDetails = () => {
   };
 
   useEffect(() => {
+    if (!listings) return;
     const listing = listings.find((listing) => listing.id === listingId);
 
     if (listing) {
-      setListing(listing);
+      (async () => {
+        setListing(listing);
+      })();
     }
   }, [listingId, listings]);
 
@@ -188,7 +190,7 @@ const ListingDetails = () => {
                   {images.map((_, index) => (
                     <button
                       onClick={() => setCurrent(index)}
-                      key='index'
+                      key={index}
                       className={`w-2.5 h-2.5 rounded-full ${current === index ? 'bg-indigo-600' : 'bg-gray-300'}`}
                     />
                   ))}
