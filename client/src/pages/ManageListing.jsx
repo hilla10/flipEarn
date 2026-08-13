@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import {
   getAllPublicListing,
   getAllUserListing,
@@ -21,6 +20,7 @@ const ManageListing = () => {
   const dispatch = useDispatch();
 
   const [loadingListing, setLoadingListing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -122,6 +122,7 @@ const ManageListing = () => {
     e.preventDefault();
     const toastId = toast.loading('Saving...');
     const dataCopy = structuredClone(formData);
+    setIsSaving(true);
 
     try {
       if (isEditing) {
@@ -168,13 +169,16 @@ const ManageListing = () => {
       toast.error(error?.response?.data?.message || error.message, {
         id: toastId,
       });
+      setIsSaving(false);
+    } finally {
+      setIsSaving(false);
     }
   };
 
   if (loadingListing) {
     return (
       <div className='h-screen flex items-center justify-center'>
-        <Loader2Icon className='size-7 animate-spine text-indigo-600' />
+        <Loader2Icon className='size-7 animate-spin text-indigo-600' />
       </div>
     );
   }
@@ -375,7 +379,13 @@ const ManageListing = () => {
             <button
               type='submit'
               className='px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors'>
-              {isEditing ? 'Update Listing' : 'Create Listing'}
+              {isSaving ? (
+                <Loader2Icon className='animate-spin text-white' />
+              ) : isEditing ? (
+                'Update Listing'
+              ) : (
+                'Create Listing'
+              )}
             </button>
           </div>
         </form>

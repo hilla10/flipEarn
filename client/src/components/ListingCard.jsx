@@ -6,6 +6,18 @@ import { useNavigate } from 'react-router-dom';
 const ListingCard = ({ listing }) => {
   const currency = import.meta.env.VITE_CURRENCY;
   const navigate = useNavigate();
+  // Safe guard clause for null/undefined/empty object
+  if (
+    !listing ||
+    (typeof listing === 'object' && Object.keys(listing).length === 0)
+  ) {
+    return null;
+  }
+
+  const handleDetailsClick = () => {
+    navigate(`/listing/${listing.id}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className='relative  bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition'>
@@ -22,15 +34,19 @@ const ListingCard = ({ listing }) => {
       <div className='p-5 pt-8'>
         {/* Header */}
         <div className='flex items-center gap-3 mb-3'>
-          {platformIcons[listing.platform]}
+          {platformIcons?.[listing.platform] || null}
 
           <div className='flex flex-col'>
             <h2 className='text-gray-800 font-semibold text-base'>
-              {listing.title}
+              {listing.title ?? 'Untitled Listing'}
             </h2>
             <p className='text-sm text-gray-500'>
-              @{listing.username} -{' '}
-              <span className='capitalize'>{listing.platform}</span>{' '}
+              @{listing.username ?? 'unknown'}{' '}
+              {listing.platform && (
+                <>
+                  - <span className='capitalize'>{listing.platform}</span>
+                </>
+              )}
             </p>
           </div>
           {listing.verified && (
@@ -43,11 +59,11 @@ const ListingCard = ({ listing }) => {
           <div className='flex items-center text-sm text-gray-600'>
             <User className='size-6 mr-1 text-gray-400' />
             <span className='text-lg font-medium text-slate-800 mr-1.5'>
-              {listing.followers_count.toLocaleString()}
+              {(listing.followers_count ?? 0).toLocaleString()}
             </span>
             followers
           </div>
-          {listing.engagement_rate && (
+          {listing.engagement_rate != null && (
             <div className='flex items-center text-sm text-gray-600'>
               <LineChart className='size-6 mr-1 text-gray-400' />
               <span className='text-lg font-medium text-slate-800 mr-1.5'>
@@ -59,9 +75,11 @@ const ListingCard = ({ listing }) => {
         </div>
         {/* Tags & Location */}
         <div className='flex items-center gap-3 mb-3'>
-          <span className='text-xs font-medium bg-pink-100 text-pink-600 px-3 py-1 rounded-full capitalize'>
-            {listing.niche}
-          </span>
+          {listing.niche && (
+            <span className='rounded-full bg-pink-100 px-3 py-1 text-xs font-medium text-pink-600 capitalize'>
+              {listing.niche}
+            </span>
+          )}
           {listing.country && (
             <div className='flex items-center text-gray-500 text-sm'>
               <MapPin className='size-6 mr-1 text-gray-400' />
@@ -70,7 +88,7 @@ const ListingCard = ({ listing }) => {
           )}
         </div>
         <p className='text-sm text-gray-600 mb-4 line-clamp-2'>
-          {listing.description}
+          {listing.description ?? 'No description provided.'}
         </p>
         <hr className='my-5 border-gray-200' />
 
@@ -78,15 +96,13 @@ const ListingCard = ({ listing }) => {
         <div className='flex items-center justify-between'>
           <div className='flex items-baseline '>
             <span className='text-2xl font-medium text-slate-800'>
-              {currency} {listing.price.toLocaleString()}
+              {currency} {(listing.price ?? 0).toLocaleString()}
             </span>
           </div>
           <button
-            onClick={() => {
-              navigate(`/listing/${listing.id}`);
-              scrollTo(0, 0);
-            }}
-            className='px-7 py-3 bg-indigo-600 text-white text-sm  rounded-lg hover:bg-indigo-700 transition'>
+            type='button'
+            onClick={handleDetailsClick}
+            className='rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'>
             More Details
           </button>
         </div>

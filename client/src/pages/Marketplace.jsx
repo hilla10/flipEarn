@@ -1,11 +1,14 @@
 import { getAllPublicListing } from '@app/features/listingSlice';
+import { useClerk, useUser } from '@clerk/clerk-react';
 import { FilterSidebar, ListingCard } from '@components';
 import { ArrowLeftIcon, FilterIcon, Loader2Icon } from 'lucide-react';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 
 const Marketplace = () => {
+  const { user } = useUser();
+  const { openSignIn } = useClerk();
   const [searchParams] = useSearchParams();
   const search = searchParams.get('search') || '';
 
@@ -130,13 +133,60 @@ const Marketplace = () => {
           filters={filters}
         />
 
-        <div className='flex-1 grid xl:grid-cols-2 gap-4'>
-          {[...filteredListings]
-            .sort((a, b) => (a.featured ? -1 : b.featured ? 1 : 0))
-            .map((listing) => (
-              <ListingCard listing={listing} key={listing.id} />
-            ))}
+        <div className='flex-1'>
+          {/* Check if filteredListings is empty */}
+          {filteredListings.length === 0 ? (
+            <div className=' mx-auto p-5 py-8 flex flex-col items-center justify-center text-center rounded-[15px] bg-linear-to-r from-[#F3EAFF] to-[#E1EFFF] max-w-3xl'>
+              {' '}
+              <div className='flex flex-col items-center mb-6'>
+                <h3 className='text-[22px] font-bold text-gray-800'>
+                  No active listings yet
+                </h3>
+                <p className='text-slate-600 max-w-150 text-lg pt-2'>
+                  Get started by creating your very first listing. It only takes
+                  a couple of minutes.
+                </p>
+              </div>
+              <Link
+                className='flex justify-center text-blue-700 text-lg font-bold'
+                to={user ? '/my-listings' : '#'}
+                onClick={() => (user ? scrollTo(0, 0) : openSignIn())}>
+                {' '}
+                My Listings{' '}
+              </Link>
+            </div>
+          ) : (
+            <div className='grid xl:grid-cols-2 gap-4'>
+              {[...filteredListings]
+                .sort((a, b) => (a.featured ? -1 : b.featured ? 1 : 0))
+                .map((listing) => (
+                  <ListingCard listing={listing} key={listing.id} />
+                ))}
+            </div>
+          )}
         </div>
+
+        {/* <div className='flex-1 grid xl:grid-cols-2 gap-4'>
+          {filteredListings.length === 0 ? (
+            <div className='mx-auto p-8 py-12 flex flex-col items-center justify-center text-center rounded-[15px] bg-linear-to-r from-[#F3EAFF] to-[#E1EFFF] border border-slate-100'>
+              <div className='flex flex-col items-center'>
+                <h3 className='text-2xl font-bold text-gray-800'>
+                  No listings found
+                </h3>
+                <p className='text-slate-600 max-w-md text-base pt-2'>
+                  No active listings match your current filters or search
+                  criteria.
+                </p>
+              </div>
+            </div>
+          ) : (
+            [...filteredListings]
+              .sort((a, b) => (a.featured ? -1 : b.featured ? 1 : 0))
+              .map((listing) => (
+                <ListingCard listing={listing} key={listing.id} />
+              ))
+          )}
+        </div> */}
       </div>
     </div>
   );
