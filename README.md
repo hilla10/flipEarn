@@ -13,7 +13,7 @@
 <h3>Build fast, scalable, and interactive web apps effortlessly.</h3>
 
 <p>
-  <a href="https://netflix-alpha-gules.vercel.app/" target="_blank">🌐 Live Demo</a>
+  <a href="https://flip-earn-seven.vercel.app/" target="_blank">🌐 Live Demo</a>
   ·
   <a href="https://github.com/hilla10/flipEarn" target="_blank">📦 GitHub</a>
   ·
@@ -88,7 +88,7 @@ Social Media Market Places is a modern social commerce and marketplace platform 
 
 ## Demo
 
-- Live App: https://netflix-alpha-gules.vercel.app/
+- Live App: https://flip-earn-seven.vercel.app/
 - GitHub Repo: https://github.com/hilla10/flipEarn
 - Portfolio: https://portfolio-rho-gules-15.vercel.app/
 
